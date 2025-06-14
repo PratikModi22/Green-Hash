@@ -187,7 +187,7 @@ const AnalyticsScreen = ({ reports }: AnalyticsScreenProps) => {
         {/* Uncleaned Reports Heatmap */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-6">
-            Uncleaned Reports (Pending >7 Days)
+            Uncleaned Reports (Pending {'>'}7 Days)
           </h3>
           
           {uncleanedReports.length > 0 ? (
