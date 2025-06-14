@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { MapPin, Filter, Search } from 'lucide-react';
 import { WasteReport } from '../pages/Index';
+import Map from './Map';
+import MapboxTokenInput from './MapboxTokenInput';
 
 interface MapViewProps {
   reports: WasteReport[];
@@ -11,6 +13,7 @@ interface MapViewProps {
 const MapView = ({ reports, onReportSelect }: MapViewProps) => {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [mapboxToken, setMapboxToken] = useState('');
 
   const statusColors = {
     dirty: 'bg-red-500',
@@ -41,6 +44,9 @@ const MapView = ({ reports, onReportSelect }: MapViewProps) => {
         {/* Header */}
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">Waste Reports Map</h2>
+          
+          {/* Mapbox Token Input */}
+          <MapboxTokenInput onTokenChange={setMapboxToken} />
           
           {/* Filters */}
           <div className="flex flex-col sm:flex-row gap-4">
@@ -73,26 +79,13 @@ const MapView = ({ reports, onReportSelect }: MapViewProps) => {
           </div>
         </div>
 
-        {/* Map Simulation */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mb-8">
-          <div className="relative h-96 bg-gradient-to-br from-emerald-100 to-blue-100 p-8">
-            <div className="absolute inset-0 bg-gray-200 opacity-20"></div>
-            <div className="relative z-10">
-              <h3 className="text-lg font-semibold text-gray-700 mb-4">Interactive Map View</h3>
-              <p className="text-gray-600 mb-4">Click on the report cards below to view details</p>
-              
-              {/* Simulated Map Pins */}
-              <div className="absolute top-20 left-20">
-                <div className={`w-4 h-4 ${statusColors.dirty} rounded-full border-2 border-white shadow-lg`}></div>
-              </div>
-              <div className="absolute top-32 right-32">
-                <div className={`w-4 h-4 ${statusColors.cleaning} rounded-full border-2 border-white shadow-lg`}></div>
-              </div>
-              <div className="absolute bottom-20 left-32">
-                <div className={`w-4 h-4 ${statusColors.cleaned} rounded-full border-2 border-white shadow-lg`}></div>
-              </div>
-            </div>
-          </div>
+        {/* Interactive Map */}
+        <div className="mb-8">
+          <Map 
+            reports={filteredReports} 
+            onReportSelect={onReportSelect}
+            mapboxToken={mapboxToken}
+          />
         </div>
 
         {/* Status Legend */}
