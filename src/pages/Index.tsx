@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import HomeScreen from '../components/HomeScreen';
 import UploadScreen from '../components/UploadScreen';
 import MapView from '../components/MapView';
@@ -20,63 +20,82 @@ export type WasteReport = {
   category: string;
   remarks: string;
   reportedAt: Date;
+  updatedAt: Date;
   beforeImage?: string;
   afterImage?: string;
+  authorityComments?: string;
 };
 
 const Index = () => {
   const [currentScreen, setCurrentScreen] = useState<'home' | 'upload' | 'map' | 'report' | 'analytics' | 'authority'>('home');
   const [selectedReport, setSelectedReport] = useState<WasteReport | null>(null);
-  const [reports, setReports] = useState<WasteReport[]>([
-    {
-      id: '1',
-      image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500',
-      location: { lat: 40.7128, lng: -74.0060, address: '123 Main St, New York, NY' },
-      status: 'dirty',
-      category: 'plastic',
-      remarks: 'Large pile of plastic bottles near the park entrance',
-      reportedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
-    },
-    {
-      id: '2',
-      image: 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=500',
-      location: { lat: 40.7589, lng: -73.9851, address: '456 Park Ave, New York, NY' },
-      status: 'cleaning',
-      category: 'metal',
-      remarks: 'Old metal cans scattered around',
-      reportedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-    },
-    {
-      id: '3',
-      image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=500',
-      location: { lat: 40.7505, lng: -73.9934, address: '789 Broadway, New York, NY' },
-      status: 'cleaned',
-      category: 'organic',
-      remarks: 'Food waste from market',
-      reportedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), // 10 days ago
-      beforeImage: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=500',
-      afterImage: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=500',
-    },
-  ]);
+  const [reports, setReports] = useState<WasteReport[]>([]);
 
-  const addReport = (report: Omit<WasteReport, 'id' | 'reportedAt'>) => {
+  // Load reports from localStorage on component mount
+  useEffect(() => {
+    const savedReports = localStorage.getItem('wasteReports');
+    if (savedReports) {
+      const parsedReports = JSON.parse(savedReports).map((report: any) => ({
+        ...report,
+        reportedAt: new Date(report.reportedAt),
+        updatedAt: new Date(report.updatedAt)
+      }));
+      setReports(parsedReports);
+    }
+  }, []);
+
+  // Save reports to localStorage whenever reports change
+  useEffect(() => {
+    localStorage.setItem('wasteReports', JSON.stringify(reports));
+  }, [reports]);
+
+  const addReport = (report: Omit<WasteReport, 'id' | 'reportedAt' | 'updatedAt'>) => {
     const newReport: WasteReport = {
       ...report,
-      id: Date.now().toString(),
+      id: `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       reportedAt: new Date(),
+      updatedAt: new Date(),
     };
-    setReports(prev => [...prev, newReport]);
+    setReports(prev => [newReport, ...prev]);
+    console.log('New report added:', newReport);
   };
 
   const updateReport = (reportId: string, updates: Partial<WasteReport>) => {
     setReports(prev => prev.map(report => 
-      report.id === reportId ? { ...report, ...updates } : report
+      report.id === reportId 
+        ? { ...report, ...updates, updatedAt: new Date() } 
+        : report
     ));
+    
+    // Update selected report if it's the one being updated
+    if (selectedReport && selectedReport.id === reportId) {
+      setSelectedReport(prev => prev ? { ...prev, ...updates, updatedAt: new Date() } : null);
+    }
+    
+    console.log('Report updated:', reportId, updates);
+  };
+
+  const deleteReport = (reportId: string) => {
+    setReports(prev => prev.filter(report => report.id !== reportId));
+    if (selectedReport && selectedReport.id === reportId) {
+      setSelectedReport(null);
+      setCurrentScreen('map');
+    }
+    console.log('Report deleted:', reportId);
   };
 
   const handleReportSelect = (report: WasteReport) => {
     setSelectedReport(report);
     setCurrentScreen('report');
+  };
+
+  const getStats = () => {
+    const total = reports.length;
+    const cleaned = reports.filter(r => r.status === 'cleaned' || r.status === 'completed').length;
+    const pending = reports.filter(r => r.status === 'dirty').length;
+    const inProgress = reports.filter(r => r.status === 'cleaning' || r.status === 'in-progress').length;
+    
+    return { total, cleaned, pending, inProgress };
   };
 
   return (
@@ -85,7 +104,11 @@ const Index = () => {
       
       <div className="pt-16">
         {currentScreen === 'home' && (
-          <HomeScreen onNavigate={setCurrentScreen} />
+          <HomeScreen 
+            onNavigate={setCurrentScreen} 
+            stats={getStats()}
+            recentReports={reports.slice(0, 3)}
+          />
         )}
         
         {currentScreen === 'upload' && (
@@ -106,6 +129,7 @@ const Index = () => {
           <ReportCard 
             report={selectedReport}
             onBack={() => setCurrentScreen('map')}
+            onDelete={deleteReport}
           />
         )}
         
