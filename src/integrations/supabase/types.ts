@@ -14,7 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      waste_reports: {
+        Row: {
+          address: string
+          after_image_url: string | null
+          authority_comments: string | null
+          before_image_url: string | null
+          category: string
+          created_at: string | null
+          id: string
+          image_url: string
+          latitude: number
+          longitude: number
+          remarks: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          address: string
+          after_image_url?: string | null
+          authority_comments?: string | null
+          before_image_url?: string | null
+          category: string
+          created_at?: string | null
+          id?: string
+          image_url: string
+          latitude: number
+          longitude: number
+          remarks?: string | null
+          status: string
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string
+          after_image_url?: string | null
+          authority_comments?: string | null
+          before_image_url?: string | null
+          category?: string
+          created_at?: string | null
+          id?: string
+          image_url?: string
+          latitude?: number
+          longitude?: number
+          remarks?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
