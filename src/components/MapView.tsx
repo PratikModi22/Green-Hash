@@ -2,8 +2,7 @@
 import React, { useState } from 'react';
 import { MapPin, Filter, Search } from 'lucide-react';
 import { WasteReport } from '../pages/Index';
-import Map from './Map';
-import MapboxTokenInput from './MapboxTokenInput';
+import GoogleMap from './GoogleMap';
 
 interface MapViewProps {
   reports: WasteReport[];
@@ -13,7 +12,6 @@ interface MapViewProps {
 const MapView = ({ reports, onReportSelect }: MapViewProps) => {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [mapboxToken, setMapboxToken] = useState('');
 
   const statusColors = {
     dirty: 'bg-red-500',
@@ -43,10 +41,7 @@ const MapView = ({ reports, onReportSelect }: MapViewProps) => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Waste Reports Map</h2>
-          
-          {/* Mapbox Token Input */}
-          <MapboxTokenInput onTokenChange={setMapboxToken} />
+          <h2 className="text-3xl font-bold text-gray-900 mb-6">Waste Reports Map</h2>
           
           {/* Filters */}
           <div className="flex flex-col sm:flex-row gap-4">
@@ -79,12 +74,11 @@ const MapView = ({ reports, onReportSelect }: MapViewProps) => {
           </div>
         </div>
 
-        {/* Interactive Map */}
+        {/* Google Map */}
         <div className="mb-8">
-          <Map 
+          <GoogleMap 
             reports={filteredReports} 
             onReportSelect={onReportSelect}
-            mapboxToken={mapboxToken}
           />
         </div>
 
