@@ -51,8 +51,8 @@ const GoogleMap = ({ reports, onReportSelect }: GoogleMapProps) => {
 
       await loader.load();
 
-      if (mapContainer.current) {
-        mapRef.current = new google.maps.Map(mapContainer.current, {
+      if (mapContainer.current && window.google) {
+        mapRef.current = new window.google.maps.Map(mapContainer.current, {
           center: { lat: 40.7128, lng: -74.0060 }, // Default to NYC
           zoom: 12,
           styles: [
@@ -80,16 +80,16 @@ const GoogleMap = ({ reports, onReportSelect }: GoogleMapProps) => {
     markersRef.current.forEach(marker => marker.setMap(null));
     markersRef.current = [];
 
-    if (!mapRef.current || !google.maps) return;
+    if (!mapRef.current || !window.google?.maps) return;
 
-    const bounds = new google.maps.LatLngBounds();
+    const bounds = new window.google.maps.LatLngBounds();
 
     reports.forEach(report => {
-      const marker = new google.maps.Marker({
+      const marker = new window.google.maps.Marker({
         position: { lat: report.location.lat, lng: report.location.lng },
         map: mapRef.current,
         icon: {
-          path: google.maps.SymbolPath.CIRCLE,
+          path: window.google.maps.SymbolPath.CIRCLE,
           fillColor: statusColors[report.status],
           fillOpacity: 1,
           strokeColor: '#ffffff',
@@ -112,7 +112,7 @@ const GoogleMap = ({ reports, onReportSelect }: GoogleMapProps) => {
       mapRef.current.fitBounds(bounds);
       
       // Prevent zooming too close for single markers
-      google.maps.event.addListenerOnce(mapRef.current, 'bounds_changed', () => {
+      window.google.maps.event.addListenerOnce(mapRef.current, 'bounds_changed', () => {
         if (mapRef.current && mapRef.current.getZoom()! > 15) {
           mapRef.current.setZoom(15);
         }
