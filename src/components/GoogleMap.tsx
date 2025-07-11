@@ -36,13 +36,18 @@ const GoogleMap = ({ reports, onReportSelect }: GoogleMapProps) => {
 
   const initializeMap = async () => {
     try {
+      console.log('🗺️ Initializing Google Maps...');
+      
       // Get API key from edge function
       const { data, error } = await supabase.functions.invoke('get-google-maps-key');
+      
+      console.log('🔑 API Key response:', { data, error });
       
       if (error || !data?.apiKey) {
         throw new Error('Failed to get Google Maps API key');
       }
 
+      console.log('📦 Loading Google Maps API...');
       const loader = new Loader({
         apiKey: data.apiKey,
         version: 'weekly',
@@ -50,8 +55,10 @@ const GoogleMap = ({ reports, onReportSelect }: GoogleMapProps) => {
       });
 
       await loader.load();
+      console.log('✅ Google Maps API loaded successfully');
 
       if (mapContainer.current && window.google) {
+        console.log('🎯 Creating map instance...');
         mapRef.current = new window.google.maps.Map(mapContainer.current, {
           center: { lat: 40.7128, lng: -74.0060 }, // Default to NYC
           zoom: 12,
@@ -64,27 +71,37 @@ const GoogleMap = ({ reports, onReportSelect }: GoogleMapProps) => {
           ]
         });
 
+        console.log('🗺️ Map created successfully');
         updateMarkers();
+      } else {
+        throw new Error('Map container or Google Maps API not available');
       }
       
       setIsLoading(false);
     } catch (err) {
-      console.error('Error initializing Google Maps:', err);
-      setError('Failed to load Google Maps');
+      console.error('❌ Error initializing Google Maps:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load Google Maps');
       setIsLoading(false);
     }
   };
 
   const updateMarkers = () => {
+    console.log('🔄 Updating markers, reports count:', reports.length);
+    
     // Clear existing markers
     markersRef.current.forEach(marker => marker.setMap(null));
     markersRef.current = [];
 
-    if (!mapRef.current || !window.google?.maps) return;
+    if (!mapRef.current || !window.google?.maps) {
+      console.log('⚠️ Map or Google Maps API not ready');
+      return;
+    }
 
     const bounds = new window.google.maps.LatLngBounds();
 
     reports.forEach(report => {
+      console.log('📍 Adding marker for report:', report.id, report.location);
+      
       const marker = new window.google.maps.Marker({
         position: { lat: report.location.lat, lng: report.location.lng },
         map: mapRef.current,
@@ -100,6 +117,7 @@ const GoogleMap = ({ reports, onReportSelect }: GoogleMapProps) => {
       });
 
       marker.addListener('click', () => {
+        console.log('🖱️ Marker clicked:', report.id);
         onReportSelect(report);
       });
 
@@ -109,6 +127,7 @@ const GoogleMap = ({ reports, onReportSelect }: GoogleMapProps) => {
 
     // Fit map to show all markers
     if (reports.length > 0) {
+      console.log('🎯 Fitting map bounds to show all markers');
       mapRef.current.fitBounds(bounds);
       
       // Prevent zooming too close for single markers
@@ -137,6 +156,12 @@ const GoogleMap = ({ reports, onReportSelect }: GoogleMapProps) => {
         <div className="text-center">
           <p className="text-red-600 mb-2">{error}</p>
           <p className="text-sm text-gray-500">Please check your Google Maps API key configuration</p>
+          <button 
+            onClick={initializeMap}
+            className="mt-2 px-4 py-2 bg-emerald-500 text-white rounded hover:bg-emerald-600"
+          >
+            Retry
+          </button>
         </div>
       </div>
     );
