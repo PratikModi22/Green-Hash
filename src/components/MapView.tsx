@@ -12,6 +12,7 @@ interface MapViewProps {
 const MapView = ({ reports, onReportSelect }: MapViewProps) => {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null);
 
   const statusColors = {
     dirty: 'bg-red-500',
@@ -36,6 +37,42 @@ const MapView = ({ reports, onReportSelect }: MapViewProps) => {
     return matchesStatus && matchesSearch;
   });
 
+  const handleCitySearch = async () => {
+    console.log('🔍 Searching for city:', searchQuery);
+    
+    if (!searchQuery.trim() || !window.google?.maps) {
+      console.log('⚠️ No search query or Google Maps not available');
+      return;
+    }
+
+    try {
+      const geocoder = new window.google.maps.Geocoder();
+      
+      geocoder.geocode({ address: searchQuery }, (results, status) => {
+        if (status === 'OK' && results && results[0]) {
+          const location = results[0].geometry.location;
+          const newCenter = {
+            lat: location.lat(),
+            lng: location.lng()
+          };
+          
+          console.log('✅ City search successful:', results[0].formatted_address, newCenter);
+          setMapCenter(newCenter);
+        } else {
+          console.error('❌ City search failed:', status);
+        }
+      });
+    } catch (error) {
+      console.error('❌ Error in city search:', error);
+    }
+  };
+
+  const handleSearchKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleCitySearch();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -49,11 +86,18 @@ const MapView = ({ reports, onReportSelect }: MapViewProps) => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Search by location or category..."
+                placeholder="Search by location/category or enter city name..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={handleSearchKeyPress}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
               />
+              <button
+                onClick={handleCitySearch}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 px-3 py-1 bg-emerald-500 text-white text-sm rounded hover:bg-emerald-600"
+              >
+                Go
+              </button>
             </div>
             
             <div className="flex items-center space-x-2">
@@ -79,6 +123,7 @@ const MapView = ({ reports, onReportSelect }: MapViewProps) => {
           <GoogleMap 
             reports={filteredReports} 
             onReportSelect={onReportSelect}
+            center={mapCenter}
           />
         </div>
 

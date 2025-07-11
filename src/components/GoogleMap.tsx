@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Loader } from '@googlemaps/js-api-loader';
 import { WasteReport } from '../pages/Index';
@@ -7,9 +6,10 @@ import { supabase } from '@/integrations/supabase/client';
 interface GoogleMapProps {
   reports: WasteReport[];
   onReportSelect: (report: WasteReport) => void;
+  center?: { lat: number; lng: number } | null;
 }
 
-const GoogleMap = ({ reports, onReportSelect }: GoogleMapProps) => {
+const GoogleMap = ({ reports, onReportSelect, center }: GoogleMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.Marker[]>([]);
@@ -33,6 +33,14 @@ const GoogleMap = ({ reports, onReportSelect }: GoogleMapProps) => {
       updateMarkers();
     }
   }, [reports]);
+
+  useEffect(() => {
+    if (mapRef.current && center) {
+      console.log('🎯 Centering map to:', center);
+      mapRef.current.setCenter(center);
+      mapRef.current.setZoom(12);
+    }
+  }, [center]);
 
   const initializeMap = async () => {
     try {

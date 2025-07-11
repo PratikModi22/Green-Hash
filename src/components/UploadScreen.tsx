@@ -42,6 +42,8 @@ const UploadScreen = ({ onAddReport, onNavigate, uploadImage }: UploadScreenProp
   };
 
   const getCurrentLocation = () => {
+    console.log('🗺️ Getting current location...');
+    
     if (!navigator.geolocation) {
       setError('Geolocation is not supported by this browser');
       return;
@@ -50,25 +52,42 @@ const UploadScreen = ({ onAddReport, onNavigate, uploadImage }: UploadScreenProp
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
+        console.log('📍 Got coordinates:', { latitude, longitude });
         
         try {
-          // Use reverse geocoding to get address
-          const response = await fetch(
-            `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=YOUR_API_KEY`
-          );
-          
-          let address = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
-          
-          if (response.ok) {
-            const data = await response.json();
-            if (data.results && data.results.length > 0) {
-              address = data.results[0].formatted || address;
-            }
+          // Use Google Maps Geocoding API instead of OpenCage
+          if (window.google && window.google.maps) {
+            const geocoder = new window.google.maps.Geocoder();
+            const latlng = { lat: latitude, lng: longitude };
+            
+            geocoder.geocode({ location: latlng }, (results, status) => {
+              if (status === 'OK' && results && results[0]) {
+                console.log('✅ Geocoding successful:', results[0].formatted_address);
+                setLocation({ 
+                  lat: latitude, 
+                  lng: longitude, 
+                  address: results[0].formatted_address 
+                });
+              } else {
+                console.log('⚠️ Geocoding failed, using coordinates');
+                setLocation({ 
+                  lat: latitude, 
+                  lng: longitude, 
+                  address: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}` 
+                });
+              }
+            });
+          } else {
+            // Fallback to coordinates if Google Maps not available
+            console.log('⚠️ Google Maps not available, using coordinates');
+            setLocation({ 
+              lat: latitude, 
+              lng: longitude, 
+              address: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}` 
+            });
           }
-          
-          setLocation({ lat: latitude, lng: longitude, address });
         } catch (error) {
-          console.error('Error getting address:', error);
+          console.error('❌ Error in reverse geocoding:', error);
           setLocation({ 
             lat: latitude, 
             lng: longitude, 
@@ -77,7 +96,7 @@ const UploadScreen = ({ onAddReport, onNavigate, uploadImage }: UploadScreenProp
         }
       },
       (error) => {
-        console.error('Error getting location:', error);
+        console.error('❌ Error getting location:', error);
         setError('Unable to get current location. Please enable location services.');
       }
     );
