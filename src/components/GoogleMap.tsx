@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { Loader } from '@googlemaps/js-api-loader';
 import { WasteReport } from '../pages/Index';
@@ -15,6 +16,7 @@ const GoogleMap = ({ reports, onReportSelect, center }: GoogleMapProps) => {
   const markersRef = useRef<google.maps.Marker[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [apiLoaded, setApiLoaded] = useState(false);
 
   const statusColors = {
     dirty: '#ef4444',
@@ -29,18 +31,18 @@ const GoogleMap = ({ reports, onReportSelect, center }: GoogleMapProps) => {
   }, []);
 
   useEffect(() => {
-    if (mapRef.current) {
+    if (mapRef.current && apiLoaded) {
       updateMarkers();
     }
-  }, [reports]);
+  }, [reports, apiLoaded]);
 
   useEffect(() => {
-    if (mapRef.current && center) {
+    if (mapRef.current && center && apiLoaded) {
       console.log('🎯 Centering map to:', center);
       mapRef.current.setCenter(center);
       mapRef.current.setZoom(12);
     }
-  }, [center]);
+  }, [center, apiLoaded]);
 
   const initializeMap = async () => {
     try {
@@ -64,28 +66,38 @@ const GoogleMap = ({ reports, onReportSelect, center }: GoogleMapProps) => {
 
       await loader.load();
       console.log('✅ Google Maps API loaded successfully');
+      setApiLoaded(true);
 
-      if (mapContainer.current && window.google) {
-        console.log('🎯 Creating map instance...');
-        mapRef.current = new window.google.maps.Map(mapContainer.current, {
-          center: { lat: 40.7128, lng: -74.0060 }, // Default to NYC
-          zoom: 12,
-          styles: [
-            {
-              featureType: 'poi',
-              elementType: 'labels',
-              stylers: [{ visibility: 'off' }]
-            }
-          ]
-        });
+      // Wait for the next tick to ensure DOM is ready
+      setTimeout(() => {
+        if (mapContainer.current && window.google?.maps) {
+          console.log('🎯 Creating map instance...');
+          console.log('Map container available:', !!mapContainer.current);
+          console.log('Google Maps API available:', !!window.google?.maps);
+          
+          mapRef.current = new window.google.maps.Map(mapContainer.current, {
+            center: { lat: 40.7128, lng: -74.0060 }, // Default to NYC
+            zoom: 12,
+            styles: [
+              {
+                featureType: 'poi',
+                elementType: 'labels',
+                stylers: [{ visibility: 'off' }]
+              }
+            ]
+          });
 
-        console.log('🗺️ Map created successfully');
-        updateMarkers();
-      } else {
-        throw new Error('Map container or Google Maps API not available');
-      }
+          console.log('🗺️ Map created successfully:', !!mapRef.current);
+          updateMarkers();
+          setIsLoading(false);
+        } else {
+          console.error('❌ Map container or Google Maps API still not available');
+          console.log('Container:', mapContainer.current);
+          console.log('Google Maps:', window.google?.maps);
+          throw new Error('Map container or Google Maps API not available after delay');
+        }
+      }, 100);
       
-      setIsLoading(false);
     } catch (err) {
       console.error('❌ Error initializing Google Maps:', err);
       setError(err instanceof Error ? err.message : 'Failed to load Google Maps');
@@ -100,8 +112,8 @@ const GoogleMap = ({ reports, onReportSelect, center }: GoogleMapProps) => {
     markersRef.current.forEach(marker => marker.setMap(null));
     markersRef.current = [];
 
-    if (!mapRef.current || !window.google?.maps) {
-      console.log('⚠️ Map or Google Maps API not ready');
+    if (!mapRef.current || !window.google?.maps || !apiLoaded) {
+      console.log('⚠️ Map, Google Maps API, or API not ready');
       return;
     }
 
