@@ -1,8 +1,6 @@
-
 import React, { useEffect, useRef, useState } from 'react';
-import { Loader } from '@googlemaps/js-api-loader';
 import { WasteReport } from '../pages/Index';
-import { supabase } from '@/integrations/supabase/client';
+import { googleMapsService } from '../services/googleMapsService';
 
 interface GoogleMapProps {
   reports: WasteReport[];
@@ -47,23 +45,11 @@ const GoogleMap = ({ reports, onReportSelect, center }: GoogleMapProps) => {
   const initializeMap = async () => {
     try {
       console.log('🗺️ Initializing Google Maps...');
+      setIsLoading(true);
+      setError(null);
       
-      // Get API key from edge function
-      const { data, error } = await supabase.functions.invoke('get-google-maps-key');
-      
-      if (error || !data?.apiKey) {
-        throw new Error('Failed to get Google Maps API key');
-      }
-
-      console.log('📦 Loading Google Maps API...');
-      const loader = new Loader({
-        apiKey: data.apiKey,
-        version: 'weekly',
-        libraries: ['places', 'geometry']
-      });
-
-      await loader.load();
-      console.log('✅ Google Maps API loaded successfully');
+      // Use centralized Google Maps service
+      await googleMapsService.loadGoogleMaps();
 
       // Ensure DOM container is ready
       if (!mapContainer.current) {
@@ -73,10 +59,10 @@ const GoogleMap = ({ reports, onReportSelect, center }: GoogleMapProps) => {
         return;
       }
 
-      // Wait a bit more to ensure everything is ready
+      // Wait a bit to ensure everything is ready
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      if (!window.google?.maps) {
+      if (!googleMapsService.isGoogleMapsLoaded()) {
         console.error('❌ Google Maps not available after loading');
         setError('Google Maps API not available');
         setIsLoading(false);
@@ -120,7 +106,7 @@ const GoogleMap = ({ reports, onReportSelect, center }: GoogleMapProps) => {
     markersRef.current.forEach(marker => marker.setMap(null));
     markersRef.current = [];
 
-    if (!mapRef.current || !window.google?.maps || !mapReady) {
+    if (!mapRef.current || !googleMapsService.isGoogleMapsLoaded() || !mapReady) {
       console.log('⚠️ Map not ready for markers');
       return;
     }

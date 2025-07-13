@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { MapPin, Filter, Search } from 'lucide-react';
 import { WasteReport } from '../pages/Index';
 import GoogleMap from './GoogleMap';
+import { googleMapsService } from '../services/googleMapsService';
 
 interface MapViewProps {
   reports: WasteReport[];
@@ -48,8 +49,10 @@ const MapView = ({ reports, onReportSelect }: MapViewProps) => {
     console.log('🔍 Searching for city:', searchQuery);
     
     try {
-      // Wait for Google Maps to be available
-      if (!window.google?.maps) {
+      // Ensure Google Maps is loaded using centralized service
+      await googleMapsService.loadGoogleMaps();
+      
+      if (!googleMapsService.isGoogleMapsLoaded()) {
         console.log('⚠️ Google Maps API not loaded yet');
         setIsSearching(false);
         return;
