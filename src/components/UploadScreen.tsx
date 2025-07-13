@@ -53,81 +53,91 @@ const UploadScreen = ({ onAddReport, onNavigate, uploadImage }: UploadScreenProp
     setIsGettingLocation(true);
     setError('');
 
+    const options = {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 300000 // 5 minutes
+    };
+
     navigator.geolocation.getCurrentPosition(
-      async (position) => {
+      (position) => {
         const { latitude, longitude } = position.coords;
         console.log('📍 Got coordinates:', { latitude, longitude });
         
-        try {
-          // Wait for Google Maps to be available
-          let attempts = 0;
-          const maxAttempts = 20;
-          
-          const waitForGoogleMaps = () => {
-            if (window.google?.maps) {
-              reverseGeocode(latitude, longitude);
-            } else if (attempts < maxAttempts) {
-              attempts++;
-              setTimeout(waitForGoogleMaps, 500);
-            } else {
-              // Fallback to coordinates if Google Maps not available
-              console.log('⚠️ Google Maps not available, using coordinates');
-              setLocation({ 
-                lat: latitude, 
-                lng: longitude, 
-                address: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}` 
-              });
-              setIsGettingLocation(false);
-            }
-          };
+        // Use coordinates immediately as fallback
+        const coordinateAddress = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+        setLocation({ 
+          lat: latitude, 
+          lng: longitude, 
+          address: coordinateAddress 
+        });
 
-          waitForGoogleMaps();
-        } catch (error) {
-          console.error('❌ Error in reverse geocoding:', error);
-          setLocation({ 
-            lat: latitude, 
-            lng: longitude, 
-            address: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}` 
-          });
-          setIsGettingLocation(false);
-        }
+        // Try to get human-readable address
+        reverseGeocode(latitude, longitude);
       },
       (error) => {
         console.error('❌ Error getting location:', error);
-        setError('Unable to get current location. Please enable location services.');
+        let errorMessage = 'Unable to get current location. ';
+        
+        switch(error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage += 'Please enable location permissions.';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage += 'Location information is unavailable.';
+            break;
+          case error.TIMEOUT:
+            errorMessage += 'Location request timed out.';
+            break;
+          default:
+            errorMessage += 'Please try again.';
+            break;
+        }
+        
+        setError(errorMessage);
         setIsGettingLocation(false);
       },
-      {
-        timeout: 10000,
-        maximumAge: 300000, // 5 minutes
-        enableHighAccuracy: true
-      }
+      options
     );
   };
 
-  const reverseGeocode = (latitude: number, longitude: number) => {
-    const geocoder = new window.google.maps.Geocoder();
-    const latlng = { lat: latitude, lng: longitude };
-    
-    geocoder.geocode({ location: latlng }, (results, status) => {
-      setIsGettingLocation(false);
+  const reverseGeocode = async (latitude: number, longitude: number) => {
+    try {
+      // Wait for Google Maps API to be available
+      let attempts = 0;
+      const maxAttempts = 30;
       
-      if (status === 'OK' && results && results[0]) {
-        console.log('✅ Geocoding successful:', results[0].formatted_address);
-        setLocation({ 
-          lat: latitude, 
-          lng: longitude, 
-          address: results[0].formatted_address 
-        });
-      } else {
-        console.log('⚠️ Geocoding failed, using coordinates');
-        setLocation({ 
-          lat: latitude, 
-          lng: longitude, 
-          address: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}` 
-        });
+      while (!window.google?.maps?.Geocoder && attempts < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        attempts++;
       }
-    });
+
+      if (!window.google?.maps?.Geocoder) {
+        console.log('⚠️ Google Maps Geocoder not available, keeping coordinates');
+        setIsGettingLocation(false);
+        return;
+      }
+
+      const geocoder = new window.google.maps.Geocoder();
+      const latlng = { lat: latitude, lng: longitude };
+      
+      geocoder.geocode({ location: latlng }, (results, status) => {
+        setIsGettingLocation(false);
+        
+        if (status === 'OK' && results && results[0]) {
+          console.log('✅ Geocoding successful:', results[0].formatted_address);
+          setLocation(prev => prev ? { 
+            ...prev,
+            address: results[0].formatted_address 
+          } : null);
+        } else {
+          console.log('⚠️ Geocoding failed, keeping coordinates');
+        }
+      });
+    } catch (error) {
+      console.error('❌ Error in reverse geocoding:', error);
+      setIsGettingLocation(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -191,7 +201,7 @@ const UploadScreen = ({ onAddReport, onNavigate, uploadImage }: UploadScreenProp
             
             {error && (
               <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center space-x-2">
-                <AlertCircle className="w-5 h-5 text-red-500" />
+                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
                 <span className="text-red-700">{error}</span>
               </div>
             )}
@@ -253,10 +263,22 @@ const UploadScreen = ({ onAddReport, onNavigate, uploadImage }: UploadScreenProp
                 </label>
                 {location ? (
                   <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
-                    <div className="flex items-center space-x-2 text-emerald-700">
-                      <MapPin className="w-4 h-4" />
-                      <span className="text-sm">{location.address}</span>
+                    <div className="flex items-start space-x-2 text-emerald-700">
+                      <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <span className="text-sm font-medium block">{location.address}</span>
+                        <span className="text-xs text-emerald-600">
+                          {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
+                        </span>
+                      </div>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => setLocation(null)}
+                      className="mt-2 text-xs text-emerald-600 hover:text-emerald-700 underline"
+                    >
+                      Change Location
+                    </button>
                   </div>
                 ) : (
                   <button
@@ -274,6 +296,9 @@ const UploadScreen = ({ onAddReport, onNavigate, uploadImage }: UploadScreenProp
                       <>
                         <MapPin className="mx-auto h-6 w-6 text-gray-400 mb-2" />
                         <span className="text-gray-600">Get Current Location</span>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Click to use your device's GPS
+                        </p>
                       </>
                     )}
                   </button>

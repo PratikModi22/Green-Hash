@@ -59,40 +59,52 @@ const GoogleMap = ({ reports, onReportSelect, center }: GoogleMapProps) => {
       const loader = new Loader({
         apiKey: data.apiKey,
         version: 'weekly',
-        libraries: ['places']
+        libraries: ['places', 'geometry']
       });
 
       await loader.load();
       console.log('✅ Google Maps API loaded successfully');
 
-      // Wait for DOM to be ready and create map
-      const createMap = () => {
-        if (mapContainer.current && window.google?.maps) {
-          console.log('🎯 Creating map instance...');
-          
-          mapRef.current = new window.google.maps.Map(mapContainer.current, {
-            center: { lat: 40.7128, lng: -74.0060 }, // Default to NYC
-            zoom: 12,
-            styles: [
-              {
-                featureType: 'poi',
-                elementType: 'labels',
-                stylers: [{ visibility: 'off' }]
-              }
-            ]
-          });
+      // Ensure DOM container is ready
+      if (!mapContainer.current) {
+        console.error('❌ Map container not found');
+        setError('Map container not available');
+        setIsLoading(false);
+        return;
+      }
 
-          console.log('🗺️ Map created successfully');
-          setMapReady(true);
-          setIsLoading(false);
-          updateMarkers();
-        } else {
-          // Retry after a short delay
-          setTimeout(createMap, 50);
-        }
-      };
+      // Wait a bit more to ensure everything is ready
+      await new Promise(resolve => setTimeout(resolve, 100));
 
-      createMap();
+      if (!window.google?.maps) {
+        console.error('❌ Google Maps not available after loading');
+        setError('Google Maps API not available');
+        setIsLoading(false);
+        return;
+      }
+
+      console.log('🎯 Creating map instance...');
+      
+      mapRef.current = new window.google.maps.Map(mapContainer.current, {
+        center: { lat: 40.7128, lng: -74.0060 }, // Default to NYC
+        zoom: 12,
+        mapTypeControl: true,
+        streetViewControl: true,
+        fullscreenControl: true,
+        zoomControl: true,
+        styles: [
+          {
+            featureType: 'poi',
+            elementType: 'labels',
+            stylers: [{ visibility: 'off' }]
+          }
+        ]
+      });
+
+      console.log('🗺️ Map created successfully');
+      setMapReady(true);
+      setIsLoading(false);
+      setError(null);
       
     } catch (err) {
       console.error('❌ Error initializing Google Maps:', err);
@@ -132,13 +144,29 @@ const GoogleMap = ({ reports, onReportSelect, center }: GoogleMapProps) => {
           fillOpacity: 1,
           strokeColor: '#ffffff',
           strokeWeight: 2,
-          scale: 8
+          scale: 10
         },
-        title: `${report.category} - ${report.status}`
+        title: `${report.category} - ${report.status}`,
+        animation: window.google.maps.Animation.DROP
+      });
+
+      // Create info window
+      const infoWindow = new window.google.maps.InfoWindow({
+        content: `
+          <div style="padding: 8px; max-width: 200px;">
+            <h3 style="margin: 0 0 8px 0; font-size: 14px; font-weight: bold;">${report.category}</h3>
+            <p style="margin: 0 0 4px 0; font-size: 12px; color: #666;">${report.location.address}</p>
+            <p style="margin: 0; font-size: 12px;">
+              <span style="display: inline-block; width: 8px; height: 8px; background: ${statusColors[report.status]}; border-radius: 50%; margin-right: 4px;"></span>
+              ${report.status.charAt(0).toUpperCase() + report.status.slice(1)}
+            </p>
+          </div>
+        `
       });
 
       marker.addListener('click', () => {
         console.log('🖱️ Marker clicked:', report.id);
+        infoWindow.open(mapRef.current, marker);
         onReportSelect(report);
       });
 
@@ -191,8 +219,12 @@ const GoogleMap = ({ reports, onReportSelect, center }: GoogleMapProps) => {
   }
 
   return (
-    <div className="w-full h-96 rounded-lg overflow-hidden shadow-sm border border-gray-200">
-      <div ref={mapContainer} className="w-full h-full" />
+    <div className="w-full h-96 rounded-lg overflow-hidden shadow-lg border border-gray-200">
+      <div 
+        ref={mapContainer} 
+        className="w-full h-full"
+        style={{ minHeight: '384px' }}
+      />
     </div>
   );
 };
