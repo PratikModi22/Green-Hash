@@ -13,6 +13,7 @@ const MapView = ({ reports, onReportSelect }: MapViewProps) => {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
 
   const statusColors = {
     dirty: 'bg-red-500',
@@ -38,17 +39,27 @@ const MapView = ({ reports, onReportSelect }: MapViewProps) => {
   });
 
   const handleCitySearch = async () => {
-    console.log('🔍 Searching for city:', searchQuery);
-    
-    if (!searchQuery.trim() || !window.google?.maps) {
-      console.log('⚠️ No search query or Google Maps not available');
+    if (!searchQuery.trim()) {
+      console.log('⚠️ No search query provided');
       return;
     }
 
+    setIsSearching(true);
+    console.log('🔍 Searching for city:', searchQuery);
+    
     try {
+      // Wait for Google Maps to be available
+      if (!window.google?.maps) {
+        console.log('⚠️ Google Maps API not loaded yet');
+        setIsSearching(false);
+        return;
+      }
+
       const geocoder = new window.google.maps.Geocoder();
       
       geocoder.geocode({ address: searchQuery }, (results, status) => {
+        setIsSearching(false);
+        
         if (status === 'OK' && results && results[0]) {
           const location = results[0].geometry.location;
           const newCenter = {
@@ -60,10 +71,12 @@ const MapView = ({ reports, onReportSelect }: MapViewProps) => {
           setMapCenter(newCenter);
         } else {
           console.error('❌ City search failed:', status);
+          // You could add a toast notification here
         }
       });
     } catch (error) {
       console.error('❌ Error in city search:', error);
+      setIsSearching(false);
     }
   };
 
@@ -90,13 +103,22 @@ const MapView = ({ reports, onReportSelect }: MapViewProps) => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleSearchKeyPress}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                className="w-full pl-10 pr-24 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                disabled={isSearching}
               />
               <button
                 onClick={handleCitySearch}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 px-3 py-1 bg-emerald-500 text-white text-sm rounded hover:bg-emerald-600"
+                disabled={isSearching || !searchQuery.trim()}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 px-3 py-1 bg-emerald-500 text-white text-sm rounded hover:bg-emerald-600 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center space-x-1"
               >
-                Go
+                {isSearching ? (
+                  <>
+                    <div className="animate-spin rounded-full h-3 w-3 border-b border-white"></div>
+                    <span>...</span>
+                  </>
+                ) : (
+                  <span>Go</span>
+                )}
               </button>
             </div>
             

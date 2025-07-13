@@ -16,6 +16,7 @@ const UploadScreen = ({ onAddReport, onNavigate, uploadImage }: UploadScreenProp
   const [category, setCategory] = useState('');
   const [remarks, setRemarks] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [error, setError] = useState('');
 
   const categories = [
@@ -49,43 +50,38 @@ const UploadScreen = ({ onAddReport, onNavigate, uploadImage }: UploadScreenProp
       return;
     }
 
+    setIsGettingLocation(true);
+    setError('');
+
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
         console.log('📍 Got coordinates:', { latitude, longitude });
         
         try {
-          // Use Google Maps Geocoding API instead of OpenCage
-          if (window.google && window.google.maps) {
-            const geocoder = new window.google.maps.Geocoder();
-            const latlng = { lat: latitude, lng: longitude };
-            
-            geocoder.geocode({ location: latlng }, (results, status) => {
-              if (status === 'OK' && results && results[0]) {
-                console.log('✅ Geocoding successful:', results[0].formatted_address);
-                setLocation({ 
-                  lat: latitude, 
-                  lng: longitude, 
-                  address: results[0].formatted_address 
-                });
-              } else {
-                console.log('⚠️ Geocoding failed, using coordinates');
-                setLocation({ 
-                  lat: latitude, 
-                  lng: longitude, 
-                  address: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}` 
-                });
-              }
-            });
-          } else {
-            // Fallback to coordinates if Google Maps not available
-            console.log('⚠️ Google Maps not available, using coordinates');
-            setLocation({ 
-              lat: latitude, 
-              lng: longitude, 
-              address: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}` 
-            });
-          }
+          // Wait for Google Maps to be available
+          let attempts = 0;
+          const maxAttempts = 20;
+          
+          const waitForGoogleMaps = () => {
+            if (window.google?.maps) {
+              reverseGeocode(latitude, longitude);
+            } else if (attempts < maxAttempts) {
+              attempts++;
+              setTimeout(waitForGoogleMaps, 500);
+            } else {
+              // Fallback to coordinates if Google Maps not available
+              console.log('⚠️ Google Maps not available, using coordinates');
+              setLocation({ 
+                lat: latitude, 
+                lng: longitude, 
+                address: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}` 
+              });
+              setIsGettingLocation(false);
+            }
+          };
+
+          waitForGoogleMaps();
         } catch (error) {
           console.error('❌ Error in reverse geocoding:', error);
           setLocation({ 
@@ -93,13 +89,45 @@ const UploadScreen = ({ onAddReport, onNavigate, uploadImage }: UploadScreenProp
             lng: longitude, 
             address: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}` 
           });
+          setIsGettingLocation(false);
         }
       },
       (error) => {
         console.error('❌ Error getting location:', error);
         setError('Unable to get current location. Please enable location services.');
+        setIsGettingLocation(false);
+      },
+      {
+        timeout: 10000,
+        maximumAge: 300000, // 5 minutes
+        enableHighAccuracy: true
       }
     );
+  };
+
+  const reverseGeocode = (latitude: number, longitude: number) => {
+    const geocoder = new window.google.maps.Geocoder();
+    const latlng = { lat: latitude, lng: longitude };
+    
+    geocoder.geocode({ location: latlng }, (results, status) => {
+      setIsGettingLocation(false);
+      
+      if (status === 'OK' && results && results[0]) {
+        console.log('✅ Geocoding successful:', results[0].formatted_address);
+        setLocation({ 
+          lat: latitude, 
+          lng: longitude, 
+          address: results[0].formatted_address 
+        });
+      } else {
+        console.log('⚠️ Geocoding failed, using coordinates');
+        setLocation({ 
+          lat: latitude, 
+          lng: longitude, 
+          address: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}` 
+        });
+      }
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -234,10 +262,20 @@ const UploadScreen = ({ onAddReport, onNavigate, uploadImage }: UploadScreenProp
                   <button
                     type="button"
                     onClick={getCurrentLocation}
-                    className="w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-center hover:border-emerald-400 transition-colors"
+                    disabled={isGettingLocation}
+                    className="w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-center hover:border-emerald-400 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <MapPin className="mx-auto h-6 w-6 text-gray-400 mb-2" />
-                    <span className="text-gray-600">Get Current Location</span>
+                    {isGettingLocation ? (
+                      <div className="flex items-center justify-center space-x-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-emerald-500"></div>
+                        <span className="text-gray-600">Getting location...</span>
+                      </div>
+                    ) : (
+                      <>
+                        <MapPin className="mx-auto h-6 w-6 text-gray-400 mb-2" />
+                        <span className="text-gray-600">Get Current Location</span>
+                      </>
+                    )}
                   </button>
                 )}
               </div>

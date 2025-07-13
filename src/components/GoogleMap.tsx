@@ -16,7 +16,7 @@ const GoogleMap = ({ reports, onReportSelect, center }: GoogleMapProps) => {
   const markersRef = useRef<google.maps.Marker[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [apiLoaded, setApiLoaded] = useState(false);
+  const [mapReady, setMapReady] = useState(false);
 
   const statusColors = {
     dirty: '#ef4444',
@@ -31,18 +31,18 @@ const GoogleMap = ({ reports, onReportSelect, center }: GoogleMapProps) => {
   }, []);
 
   useEffect(() => {
-    if (mapRef.current && apiLoaded) {
+    if (mapRef.current && mapReady) {
       updateMarkers();
     }
-  }, [reports, apiLoaded]);
+  }, [reports, mapReady]);
 
   useEffect(() => {
-    if (mapRef.current && center && apiLoaded) {
+    if (mapRef.current && center && mapReady) {
       console.log('🎯 Centering map to:', center);
       mapRef.current.setCenter(center);
-      mapRef.current.setZoom(12);
+      mapRef.current.setZoom(15);
     }
-  }, [center, apiLoaded]);
+  }, [center, mapReady]);
 
   const initializeMap = async () => {
     try {
@@ -50,8 +50,6 @@ const GoogleMap = ({ reports, onReportSelect, center }: GoogleMapProps) => {
       
       // Get API key from edge function
       const { data, error } = await supabase.functions.invoke('get-google-maps-key');
-      
-      console.log('🔑 API Key response:', { data, error });
       
       if (error || !data?.apiKey) {
         throw new Error('Failed to get Google Maps API key');
@@ -66,14 +64,11 @@ const GoogleMap = ({ reports, onReportSelect, center }: GoogleMapProps) => {
 
       await loader.load();
       console.log('✅ Google Maps API loaded successfully');
-      setApiLoaded(true);
 
-      // Wait for the next tick to ensure DOM is ready
-      setTimeout(() => {
+      // Wait for DOM to be ready and create map
+      const createMap = () => {
         if (mapContainer.current && window.google?.maps) {
           console.log('🎯 Creating map instance...');
-          console.log('Map container available:', !!mapContainer.current);
-          console.log('Google Maps API available:', !!window.google?.maps);
           
           mapRef.current = new window.google.maps.Map(mapContainer.current, {
             center: { lat: 40.7128, lng: -74.0060 }, // Default to NYC
@@ -87,16 +82,17 @@ const GoogleMap = ({ reports, onReportSelect, center }: GoogleMapProps) => {
             ]
           });
 
-          console.log('🗺️ Map created successfully:', !!mapRef.current);
-          updateMarkers();
+          console.log('🗺️ Map created successfully');
+          setMapReady(true);
           setIsLoading(false);
+          updateMarkers();
         } else {
-          console.error('❌ Map container or Google Maps API still not available');
-          console.log('Container:', mapContainer.current);
-          console.log('Google Maps:', window.google?.maps);
-          throw new Error('Map container or Google Maps API not available after delay');
+          // Retry after a short delay
+          setTimeout(createMap, 50);
         }
-      }, 100);
+      };
+
+      createMap();
       
     } catch (err) {
       console.error('❌ Error initializing Google Maps:', err);
@@ -112,8 +108,13 @@ const GoogleMap = ({ reports, onReportSelect, center }: GoogleMapProps) => {
     markersRef.current.forEach(marker => marker.setMap(null));
     markersRef.current = [];
 
-    if (!mapRef.current || !window.google?.maps || !apiLoaded) {
-      console.log('⚠️ Map, Google Maps API, or API not ready');
+    if (!mapRef.current || !window.google?.maps || !mapReady) {
+      console.log('⚠️ Map not ready for markers');
+      return;
+    }
+
+    if (reports.length === 0) {
+      console.log('📍 No reports to display');
       return;
     }
 
@@ -131,7 +132,7 @@ const GoogleMap = ({ reports, onReportSelect, center }: GoogleMapProps) => {
           fillOpacity: 1,
           strokeColor: '#ffffff',
           strokeWeight: 2,
-          scale: 6
+          scale: 8
         },
         title: `${report.category} - ${report.status}`
       });
@@ -145,17 +146,14 @@ const GoogleMap = ({ reports, onReportSelect, center }: GoogleMapProps) => {
       bounds.extend(marker.getPosition()!);
     });
 
-    // Fit map to show all markers
-    if (reports.length > 0) {
+    // Fit map to show all markers if we have multiple reports
+    if (reports.length > 1) {
       console.log('🎯 Fitting map bounds to show all markers');
       mapRef.current.fitBounds(bounds);
-      
-      // Prevent zooming too close for single markers
-      window.google.maps.event.addListenerOnce(mapRef.current, 'bounds_changed', () => {
-        if (mapRef.current && mapRef.current.getZoom()! > 15) {
-          mapRef.current.setZoom(15);
-        }
-      });
+    } else if (reports.length === 1) {
+      // Center on single marker
+      mapRef.current.setCenter({ lat: reports[0].location.lat, lng: reports[0].location.lng });
+      mapRef.current.setZoom(15);
     }
   };
 
@@ -177,7 +175,12 @@ const GoogleMap = ({ reports, onReportSelect, center }: GoogleMapProps) => {
           <p className="text-red-600 mb-2">{error}</p>
           <p className="text-sm text-gray-500">Please check your Google Maps API key configuration</p>
           <button 
-            onClick={initializeMap}
+            onClick={() => {
+              setError(null);
+              setIsLoading(true);
+              setMapReady(false);
+              initializeMap();
+            }}
             className="mt-2 px-4 py-2 bg-emerald-500 text-white rounded hover:bg-emerald-600"
           >
             Retry
