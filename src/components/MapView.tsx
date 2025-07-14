@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import { MapPin, Filter, Search } from 'lucide-react';
 import { WasteReport } from '../pages/Index';
-import GoogleMap from './GoogleMap';
-import { googleMapsService } from '../services/googleMapsService';
+import LeafletMap from './LeafletMap';
+import { GeocodingService } from '../services/geocodingService';
 
 interface MapViewProps {
   reports: WasteReport[];
@@ -49,36 +49,18 @@ const MapView = ({ reports, onReportSelect }: MapViewProps) => {
     console.log('🔍 Searching for city:', searchQuery);
     
     try {
-      // Ensure Google Maps is loaded using centralized service
-      await googleMapsService.loadGoogleMaps();
+      const result = await GeocodingService.searchLocation(searchQuery);
       
-      if (!googleMapsService.isGoogleMapsLoaded()) {
-        console.log('⚠️ Google Maps API not loaded yet');
-        setIsSearching(false);
-        return;
+      if (result) {
+        console.log('✅ City search successful:', result.address, result);
+        setMapCenter({ lat: result.lat, lng: result.lng });
+      } else {
+        console.error('❌ City search failed: No results found');
+        // You could add a toast notification here
       }
-
-      const geocoder = new window.google.maps.Geocoder();
-      
-      geocoder.geocode({ address: searchQuery }, (results, status) => {
-        setIsSearching(false);
-        
-        if (status === 'OK' && results && results[0]) {
-          const location = results[0].geometry.location;
-          const newCenter = {
-            lat: location.lat(),
-            lng: location.lng()
-          };
-          
-          console.log('✅ City search successful:', results[0].formatted_address, newCenter);
-          setMapCenter(newCenter);
-        } else {
-          console.error('❌ City search failed:', status);
-          // You could add a toast notification here
-        }
-      });
     } catch (error) {
       console.error('❌ Error in city search:', error);
+    } finally {
       setIsSearching(false);
     }
   };
@@ -143,9 +125,9 @@ const MapView = ({ reports, onReportSelect }: MapViewProps) => {
           </div>
         </div>
 
-        {/* Google Map */}
+        {/* Leaflet Map */}
         <div className="mb-8">
-          <GoogleMap 
+          <LeafletMap 
             reports={filteredReports} 
             onReportSelect={onReportSelect}
             center={mapCenter}

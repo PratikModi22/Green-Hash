@@ -103,39 +103,22 @@ const UploadScreen = ({ onAddReport, onNavigate, uploadImage }: UploadScreenProp
 
   const reverseGeocode = async (latitude: number, longitude: number) => {
     try {
-      // Wait for Google Maps API to be available
-      let attempts = 0;
-      const maxAttempts = 30;
+      const address = await import('../services/geocodingService').then(({ GeocodingService }) => 
+        GeocodingService.reverseGeocode(latitude, longitude)
+      );
       
-      while (!window.google?.maps?.Geocoder && attempts < maxAttempts) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        attempts++;
+      if (address) {
+        console.log('✅ Geocoding successful:', address);
+        setLocation(prev => prev ? { 
+          ...prev,
+          address 
+        } : null);
+      } else {
+        console.log('⚠️ Geocoding failed, keeping coordinates');
       }
-
-      if (!window.google?.maps?.Geocoder) {
-        console.log('⚠️ Google Maps Geocoder not available, keeping coordinates');
-        setIsGettingLocation(false);
-        return;
-      }
-
-      const geocoder = new window.google.maps.Geocoder();
-      const latlng = { lat: latitude, lng: longitude };
-      
-      geocoder.geocode({ location: latlng }, (results, status) => {
-        setIsGettingLocation(false);
-        
-        if (status === 'OK' && results && results[0]) {
-          console.log('✅ Geocoding successful:', results[0].formatted_address);
-          setLocation(prev => prev ? { 
-            ...prev,
-            address: results[0].formatted_address 
-          } : null);
-        } else {
-          console.log('⚠️ Geocoding failed, keeping coordinates');
-        }
-      });
     } catch (error) {
       console.error('❌ Error in reverse geocoding:', error);
+    } finally {
       setIsGettingLocation(false);
     }
   };
