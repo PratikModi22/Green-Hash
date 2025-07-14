@@ -48,19 +48,23 @@ const GoogleMap = ({ reports, onReportSelect, center }: GoogleMapProps) => {
       setIsLoading(true);
       setError(null);
       
-      // Use centralized Google Maps service
-      await googleMapsService.loadGoogleMaps();
-
+      // Wait for DOM to be ready first
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       // Ensure DOM container is ready
       if (!mapContainer.current) {
-        console.error('❌ Map container not found');
-        setError('Map container not available');
-        setIsLoading(false);
-        return;
+        console.error('❌ Map container not found, retrying...');
+        // Retry after longer delay
+        await new Promise(resolve => setTimeout(resolve, 500));
+        if (!mapContainer.current) {
+          setError('Map container not available');
+          setIsLoading(false);
+          return;
+        }
       }
 
-      // Wait a bit to ensure everything is ready
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Use centralized Google Maps service
+      await googleMapsService.loadGoogleMaps();
 
       if (!googleMapsService.isGoogleMapsLoaded()) {
         console.error('❌ Google Maps not available after loading');
