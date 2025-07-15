@@ -22,9 +22,9 @@ const Navigation = ({ currentScreen, setCurrentScreen }: NavigationProps) => {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">W</span>
+              <span className="text-white font-bold text-sm">GH</span>
             </div>
-            <span className="font-semibold text-gray-900">WasteTracker</span>
+            <span className="font-semibold text-gray-900">Green Hash</span>
           </div>
           
           <div className="flex space-x-1">
