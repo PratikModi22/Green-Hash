@@ -64,6 +64,9 @@ const LeafletMap = ({ reports, onReportSelect, center }: LeafletMapProps) => {
   const defaultCenter: [number, number] = [40.7128, -74.0060]; // Default to NYC
   const [mapZoom] = useState(12);
 
+  console.log('LeafletMap: reports count:', reports.length);
+  console.log('LeafletMap: center:', center);
+
   return (
     <div className="w-full h-96 rounded-lg overflow-hidden shadow-lg border border-gray-200">
       <MapContainer
@@ -81,6 +84,7 @@ const LeafletMap = ({ reports, onReportSelect, center }: LeafletMapProps) => {
         <MapCenter center={center} />
         
         {reports.map((report) => {
+          console.log('Rendering marker for report:', report.id, report.location);
           const statusColors = {
             dirty: '#ef4444',
             cleaning: '#eab308',
