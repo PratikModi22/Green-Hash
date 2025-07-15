@@ -84,52 +84,26 @@ const LeafletMap = ({ reports, onReportSelect, center }: LeafletMapProps) => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         
-        <MapCenter center={center} />
+        {center && <MapCenter center={center} />}
         
-        {reports.map((report) => {
-          console.log('Rendering marker for report:', report.id, report.location);
-          const statusColors = {
-            dirty: '#ef4444',
-            cleaning: '#eab308',
-            cleaned: '#10b981',
-            'in-progress': '#3b82f6',
-            completed: '#059669',
-          };
-          const color = statusColors[report.status as keyof typeof statusColors] || '#6b7280';
-          
-          return (
-            <Marker
-              key={report.id}
-              position={[report.location.lat, report.location.lng] as [number, number]}
-              icon={defaultIcon}
-              eventHandlers={{
-                click: () => onReportSelect(report),
-              }}
-            >
-              <Popup>
-                <div style={{ padding: '8px', maxWidth: '200px' }}>
-                  <h3 style={{ margin: '0 0 8px 0', fontSize: '14px', fontWeight: 'bold' }}>
-                    {report.category}
-                  </h3>
-                  <p style={{ margin: '0 0 4px 0', fontSize: '12px', color: '#666' }}>
-                    {report.location.address}
-                  </p>
-                  <p style={{ margin: '0', fontSize: '12px' }}>
-                    <span style={{ 
-                      display: 'inline-block', 
-                      width: '8px', 
-                      height: '8px', 
-                      background: color,
-                      borderRadius: '50%', 
-                      marginRight: '4px' 
-                    }}></span>
-                    {report.status.charAt(0).toUpperCase() + report.status.slice(1)}
-                  </p>
-                </div>
-              </Popup>
-            </Marker>
-          );
-        })}
+        {reports.map((report) => (
+          <Marker
+            key={report.id}
+            position={[report.location.lat, report.location.lng] as [number, number]}
+            icon={defaultIcon}
+            eventHandlers={{
+              click: () => onReportSelect(report),
+            }}
+          >
+            <Popup>
+              <div>
+                <h3>{report.category}</h3>
+                <p>{report.location.address}</p>
+                <p>Status: {report.status}</p>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
       </MapContainer>
     </div>
   );
