@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { MapPin, Filter, Search } from 'lucide-react';
 import { WasteReport } from '../pages/Index';
-import LeafletMap from './LeafletMap';
+import MapboxMap from './MapboxMap';
 import { GeocodingService } from '../services/geocodingService';
 
 interface MapViewProps {
@@ -125,9 +125,9 @@ const MapView = ({ reports, onReportSelect }: MapViewProps) => {
           </div>
         </div>
 
-        {/* Leaflet Map */}
+        {/* Mapbox Map */}
         <div className="mb-8">
-          <LeafletMap 
+          <MapboxMap 
             reports={filteredReports} 
             onReportSelect={onReportSelect}
             center={mapCenter}
