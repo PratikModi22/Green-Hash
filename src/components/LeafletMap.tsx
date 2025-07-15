@@ -4,12 +4,15 @@ import L from 'leaflet';
 import { WasteReport } from '../pages/Index';
 import 'leaflet/dist/leaflet.css';
 
-// Fix for default markers in react-leaflet
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+// Simpler fix for default markers in react-leaflet
+const defaultIcon = L.icon({
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
 });
 
 interface LeafletMapProps {
@@ -98,7 +101,7 @@ const LeafletMap = ({ reports, onReportSelect, center }: LeafletMapProps) => {
             <Marker
               key={report.id}
               position={[report.location.lat, report.location.lng] as [number, number]}
-              icon={createCustomIcon(report.status)}
+              icon={defaultIcon}
               eventHandlers={{
                 click: () => onReportSelect(report),
               }}
