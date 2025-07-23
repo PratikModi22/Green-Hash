@@ -179,6 +179,70 @@ export const useWasteReports = () => {
 
   useEffect(() => {
     fetchReports();
+
+    // Set up real-time subscription for all changes
+    const channel = supabase
+      .channel('waste-reports-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'waste_reports'
+        },
+        (payload) => {
+          console.log('Real-time change detected:', payload);
+          
+          if (payload.eventType === 'INSERT') {
+            const newReport: WasteReport = {
+              id: payload.new.id,
+              image: payload.new.image_url,
+              location: {
+                lat: parseFloat(payload.new.latitude.toString()),
+                lng: parseFloat(payload.new.longitude.toString()),
+                address: payload.new.address,
+              },
+              status: payload.new.status as WasteReport['status'],
+              category: payload.new.category,
+              remarks: payload.new.remarks || '',
+              reportedAt: new Date(payload.new.created_at),
+              updatedAt: new Date(payload.new.updated_at),
+              beforeImage: payload.new.before_image_url || undefined,
+              afterImage: payload.new.after_image_url || undefined,
+              authorityComments: payload.new.authority_comments || undefined,
+            };
+            setReports(prev => [newReport, ...prev]);
+          } else if (payload.eventType === 'UPDATE') {
+            const updatedReport: WasteReport = {
+              id: payload.new.id,
+              image: payload.new.image_url,
+              location: {
+                lat: parseFloat(payload.new.latitude.toString()),
+                lng: parseFloat(payload.new.longitude.toString()),
+                address: payload.new.address,
+              },
+              status: payload.new.status as WasteReport['status'],
+              category: payload.new.category,
+              remarks: payload.new.remarks || '',
+              reportedAt: new Date(payload.new.created_at),
+              updatedAt: new Date(payload.new.updated_at),
+              beforeImage: payload.new.before_image_url || undefined,
+              afterImage: payload.new.after_image_url || undefined,
+              authorityComments: payload.new.authority_comments || undefined,
+            };
+            setReports(prev => prev.map(report => 
+              report.id === payload.new.id ? updatedReport : report
+            ));
+          } else if (payload.eventType === 'DELETE') {
+            setReports(prev => prev.filter(report => report.id !== payload.old.id));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   return {

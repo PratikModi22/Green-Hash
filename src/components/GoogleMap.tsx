@@ -17,11 +17,19 @@ const GoogleMap = ({ reports, onReportSelect, center }: GoogleMapProps) => {
   const [error, setError] = useState<string | null>(null);
 
   const statusColors = {
-    dirty: '#ef4444',
-    cleaning: '#eab308',
-    cleaned: '#10b981',
-    'in-progress': '#3b82f6',
-    completed: '#059669',
+    dirty: '#ef4444',        // Red for dirty/reported waste
+    cleaning: '#eab308',     // Yellow for cleaning in progress
+    cleaned: '#10b981',      // Green for cleaned waste
+    'in-progress': '#3b82f6', // Blue for in progress
+    completed: '#059669',     // Dark green for completed
+  };
+
+  const statusLabels = {
+    dirty: 'Needs Cleaning',
+    cleaning: 'Being Cleaned',
+    cleaned: 'Recently Cleaned',
+    'in-progress': 'In Progress',
+    completed: 'Completed',
   };
 
   useEffect(() => {

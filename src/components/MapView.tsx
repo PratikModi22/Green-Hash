@@ -1,9 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapPin, Filter, Search } from 'lucide-react';
 import { WasteReport } from '../pages/Index';
 import GoogleMap from './GoogleMap';
 import { GeocodingService } from '../services/geocodingService';
+import { supabase } from '../integrations/supabase/client';
 
 interface MapViewProps {
   reports: WasteReport[];
@@ -32,12 +33,46 @@ const MapView = ({ reports, onReportSelect }: MapViewProps) => {
     completed: 'Completed',
   };
 
+  // Filter reports: exclude cleaned reports older than 7 days
   const filteredReports = reports.filter(report => {
+    // Hide cleaned reports that are older than 7 days
+    if (report.status === 'cleaned') {
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const updatedAt = new Date(report.updatedAt);
+      if (updatedAt < sevenDaysAgo) {
+        return false; // Hide old cleaned reports
+      }
+    }
+
     const matchesStatus = filterStatus === 'all' || report.status === filterStatus;
     const matchesSearch = report.location.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          report.category.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesStatus && matchesSearch;
   });
+
+  // Set up real-time subscription for status updates
+  useEffect(() => {
+    const channel = supabase
+      .channel('waste-reports-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'waste_reports'
+        },
+        (payload) => {
+          console.log('Real-time update:', payload);
+          // The parent component will handle refetching
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   const handleCitySearch = async () => {
     if (!searchQuery.trim()) {
