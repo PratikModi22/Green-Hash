@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Loader } from '@googlemaps/js-api-loader';
 import { WasteReport } from '../pages/Index';
+import { supabase } from '../integrations/supabase/client';
 
 interface GoogleMapProps {
   reports: WasteReport[];
@@ -12,6 +13,8 @@ const GoogleMap = ({ reports, onReportSelect, center }: GoogleMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.Marker[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const statusColors = {
     dirty: '#ef4444',
@@ -25,16 +28,18 @@ const GoogleMap = ({ reports, onReportSelect, center }: GoogleMapProps) => {
     const initMap = async () => {
       if (!mapRef.current) return;
 
-      // You'll need to set your Google Maps API key in Supabase secrets
-      const apiKey = 'YOUR_GOOGLE_MAPS_API_KEY'; // This will be replaced with actual secret
-      
-      if (!apiKey || apiKey === 'YOUR_GOOGLE_MAPS_API_KEY') {
-        return;
-      }
-
       try {
+        setIsLoading(true);
+        setError(null);
+
+        // Fetch API key from edge function
+        const { data, error: functionError } = await supabase.functions.invoke('get-google-maps-key');
+        
+        if (functionError) throw functionError;
+        if (!data?.apiKey) throw new Error('No API key received');
+
         const loader = new Loader({
-          apiKey,
+          apiKey: data.apiKey,
           version: 'weekly',
           libraries: ['maps']
         });
@@ -55,8 +60,11 @@ const GoogleMap = ({ reports, onReportSelect, center }: GoogleMapProps) => {
           ]
         });
 
+        setIsLoading(false);
       } catch (error) {
         console.error('Error loading Google Maps:', error);
+        setError(error instanceof Error ? error.message : 'Failed to load map');
+        setIsLoading(false);
       }
     };
 
@@ -129,13 +137,18 @@ const GoogleMap = ({ reports, onReportSelect, center }: GoogleMapProps) => {
   }, [reports, onReportSelect]);
 
   return (
-    <div className="w-full h-96 rounded-lg overflow-hidden shadow-lg border border-gray-200">
+    <div className="w-full h-96 rounded-lg overflow-hidden shadow-lg border border-gray-200 relative">
       <div ref={mapRef} className="w-full h-full" />
-      <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-2 rounded-lg shadow-md">
-        <p className="text-xs text-gray-600">
-          Add Google Maps API key to enable maps
-        </p>
-      </div>
+      {isLoading && (
+        <div className="absolute inset-0 bg-white/90 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+        </div>
+      )}
+      {error && (
+        <div className="absolute top-4 left-4 bg-red-100 border border-red-300 text-red-700 px-3 py-2 rounded-lg shadow-md">
+          <p className="text-xs">{error}</p>
+        </div>
+      )}
     </div>
   );
 };
