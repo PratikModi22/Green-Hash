@@ -1,10 +1,10 @@
 
 import React from 'react';
-import { Camera, Map, BarChart3, Shield, Home } from 'lucide-react';
+import { Camera, Map, BarChart3, Shield, Home, Trophy, Images } from 'lucide-react';
 
 interface NavigationProps {
   currentScreen: string;
-  setCurrentScreen: (screen: 'home' | 'upload' | 'map' | 'analytics' | 'authority') => void;
+  setCurrentScreen: (screen: 'home' | 'upload' | 'map' | 'analytics' | 'authority' | 'leaderboard' | 'gallery') => void;
 }
 
 const Navigation = ({ currentScreen, setCurrentScreen }: NavigationProps) => {
@@ -12,22 +12,14 @@ const Navigation = ({ currentScreen, setCurrentScreen }: NavigationProps) => {
     { id: 'home', label: 'Home', icon: Home },
     { id: 'upload', label: 'Report', icon: Camera },
     { id: 'map', label: 'Map', icon: Map },
+    { id: 'gallery', label: 'Gallery', icon: Images },
+    { id: 'leaderboard', label: 'Leaderboard', icon: Trophy },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'authority', label: 'Authority', icon: Shield },
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">GH</span>
-            </div>
-            <span className="font-semibold text-gray-900">Green Hash</span>
-          </div>
-          
-          <div className="flex space-x-1">
+    <div className="flex space-x-1">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = currentScreen === item.id;
@@ -47,10 +39,7 @@ const Navigation = ({ currentScreen, setCurrentScreen }: NavigationProps) => {
                 </button>
               );
             })}
-          </div>
-        </div>
-      </div>
-    </nav>
+    </div>
   );
 };
 

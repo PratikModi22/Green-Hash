@@ -54,7 +54,7 @@ const GoogleMap = ({ reports, onReportSelect, center }: GoogleMapProps) => {
 
         await loader.load();
 
-        const defaultCenter = center || { lat: 40.7128, lng: -74.0060 };
+        const defaultCenter = center || { lat: 19.8762, lng: 75.3433 }; // Aurangabad, Maharashtra, India
 
         mapInstanceRef.current = new google.maps.Map(mapRef.current, {
           center: defaultCenter,

@@ -50,6 +50,25 @@ export const useWasteReports = () => {
   // Add a new report
   const addReport = async (report: Omit<WasteReport, 'id' | 'reportedAt' | 'updatedAt'>) => {
     try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('User not authenticated');
+        return null;
+      }
+
+      // Get user record from users table
+      const { data: userData } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .single();
+
+      if (!userData) {
+        console.error('User profile not found');
+        return null;
+      }
+
       const { data, error } = await supabase
         .from('waste_reports')
         .insert({
@@ -63,6 +82,7 @@ export const useWasteReports = () => {
           before_image_url: report.beforeImage,
           after_image_url: report.afterImage,
           authority_comments: report.authorityComments,
+          user_id: userData.id,
         })
         .select()
         .single();

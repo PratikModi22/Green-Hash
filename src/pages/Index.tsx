@@ -1,5 +1,8 @@
 
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
 import HomeScreen from '../components/HomeScreen';
 import UploadScreen from '../components/UploadScreen';
 import MapView from '../components/MapView';
@@ -7,6 +10,8 @@ import ReportCard from '../components/ReportCard';
 import AnalyticsScreen from '../components/AnalyticsScreen';
 import AuthorityLogin from '../components/AuthorityLogin';
 import Navigation from '../components/Navigation';
+import Leaderboard from '../components/Leaderboard';
+import GalleryView from '../components/GalleryView';
 import { useWasteReports } from '../hooks/useWasteReports';
 
 export type WasteReport = {
@@ -28,7 +33,8 @@ export type WasteReport = {
 };
 
 const Index = () => {
-  const [currentScreen, setCurrentScreen] = useState<'home' | 'upload' | 'map' | 'report' | 'analytics' | 'authority'>('home');
+  const { user, signOut } = useAuth();
+  const [currentScreen, setCurrentScreen] = useState<'home' | 'upload' | 'map' | 'report' | 'analytics' | 'authority' | 'leaderboard' | 'gallery'>('home');
   const [selectedReport, setSelectedReport] = useState<WasteReport | null>(null);
   
   const { 
@@ -75,9 +81,34 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation currentScreen={currentScreen} setCurrentScreen={setCurrentScreen} />
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center gap-8">
+              <h1 className="text-xl font-bold text-primary">EcoTrack</h1>
+              <Navigation currentScreen={currentScreen} setCurrentScreen={setCurrentScreen} />
+            </div>
+            <div className="flex items-center gap-4">
+              {user ? (
+                <div className="flex items-center gap-4">
+                  <span className="text-sm text-muted-foreground">Hello, {user.email}</span>
+                  <Button onClick={signOut} variant="outline" size="sm">
+                    Sign Out
+                  </Button>
+                </div>
+              ) : (
+                <Link to="/auth">
+                  <Button variant="outline" size="sm">
+                    Sign In / Sign Up
+                  </Button>
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
       
-      <div className="pt-16">
+      <div className="pt-6">
         {currentScreen === 'home' && (
           <HomeScreen 
             onNavigate={setCurrentScreen} 
@@ -118,6 +149,18 @@ const Index = () => {
             reports={reports}
             onUpdateReport={updateReport}
           />
+        )}
+
+        {currentScreen === 'leaderboard' && (
+          <div className="container mx-auto px-4 py-8">
+            <Leaderboard />
+          </div>
+        )}
+
+        {currentScreen === 'gallery' && (
+          <div className="container mx-auto px-4 py-8">
+            <GalleryView reports={reports} />
+          </div>
         )}
       </div>
     </div>
