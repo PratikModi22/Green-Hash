@@ -10,10 +10,100 @@ export type Database = {
   // Allows to automatically instanciate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "12.2.12 (cd3cf9e)"
   }
   public: {
     Tables: {
+      admins: {
+        Row: {
+          auth_id: string | null
+          created_at: string
+          email: string
+          id: string
+          name: string
+          role: string
+          updated_at: string
+        }
+        Insert: {
+          auth_id?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          role?: string
+          updated_at?: string
+        }
+        Update: {
+          auth_id?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          role?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      users: {
+        Row: {
+          auth_id: string | null
+          citizen_of_month_count: number | null
+          citizen_of_week_count: number | null
+          citizen_of_year_count: number | null
+          created_at: string
+          email: string
+          id: string
+          last_month_reset: string | null
+          last_week_reset: string | null
+          last_year_reset: string | null
+          location: string | null
+          monthly_reports: number | null
+          name: string
+          total_reports: number | null
+          updated_at: string
+          weekly_reports: number | null
+          yearly_reports: number | null
+        }
+        Insert: {
+          auth_id?: string | null
+          citizen_of_month_count?: number | null
+          citizen_of_week_count?: number | null
+          citizen_of_year_count?: number | null
+          created_at?: string
+          email: string
+          id?: string
+          last_month_reset?: string | null
+          last_week_reset?: string | null
+          last_year_reset?: string | null
+          location?: string | null
+          monthly_reports?: number | null
+          name: string
+          total_reports?: number | null
+          updated_at?: string
+          weekly_reports?: number | null
+          yearly_reports?: number | null
+        }
+        Update: {
+          auth_id?: string | null
+          citizen_of_month_count?: number | null
+          citizen_of_week_count?: number | null
+          citizen_of_year_count?: number | null
+          created_at?: string
+          email?: string
+          id?: string
+          last_month_reset?: string | null
+          last_week_reset?: string | null
+          last_year_reset?: string | null
+          location?: string | null
+          monthly_reports?: number | null
+          name?: string
+          total_reports?: number | null
+          updated_at?: string
+          weekly_reports?: number | null
+          yearly_reports?: number | null
+        }
+        Relationships: []
+      }
       waste_reports: {
         Row: {
           address: string
@@ -29,6 +119,7 @@ export type Database = {
           remarks: string | null
           status: string
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           address: string
@@ -44,6 +135,7 @@ export type Database = {
           remarks?: string | null
           status: string
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           address?: string
@@ -59,15 +151,35 @@ export type Database = {
           remarks?: string | null
           status?: string
           updated_at?: string | null
+          user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "waste_reports_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      reset_monthly_counts: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      reset_weekly_counts: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      reset_yearly_counts: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
