@@ -1,12 +1,16 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { useWasteReports } from '@/hooks/useWasteReports';
 import { supabase } from '@/integrations/supabase/client';
-import { useState } from 'react';
+import AdminSidebar from '@/components/admin/AdminSidebar';
+import AdminDashboardContent from '@/components/admin/AdminDashboardContent';
+import ManageUsers from '@/components/admin/ManageUsers';
+import ViewReports from '@/components/admin/ViewReports';
+import LeaderboardManagement from '@/components/admin/LeaderboardManagement';
+import AdminAnalytics from '@/components/admin/AdminAnalytics';
+import AdminSettings from '@/components/admin/AdminSettings';
 
 interface LeaderboardUser {
   id: string;
@@ -26,6 +30,7 @@ const AdminDashboard = () => {
   const { reports } = useWasteReports();
   const navigate = useNavigate();
   const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
+  const [activeSection, setActiveSection] = useState('dashboard');
 
   useEffect(() => {
     if (!isAdmin) {
@@ -58,97 +63,60 @@ const AdminDashboard = () => {
     return null;
   }
 
-  const totalReports = reports.length;
-  const pendingReports = reports.filter(r => r.status === 'dirty').length;
-  const cleanedReports = reports.filter(r => r.status === 'cleaned' || r.status === 'completed').length;
+  const renderContent = () => {
+    switch (activeSection) {
+      case 'dashboard':
+        return <AdminDashboardContent reports={reports} />;
+      case 'users':
+        return <ManageUsers leaderboard={leaderboard} />;
+      case 'reports':
+        return <ViewReports reports={reports} />;
+      case 'leaderboard':
+        return <LeaderboardManagement leaderboard={leaderboard} />;
+      case 'analytics':
+        return <AdminAnalytics reports={reports} />;
+      case 'settings':
+        return <AdminSettings />;
+      default:
+        return <AdminDashboardContent reports={reports} />;
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-            <p className="text-muted-foreground">Welcome back, {user?.email}</p>
-          </div>
-          <Button onClick={handleSignOut} variant="outline">
-            Sign Out
-          </Button>
-        </div>
+    <div className="min-h-screen bg-background flex">
+      {/* Sidebar */}
+      <AdminSidebar
+        activeSection={activeSection}
+        onSectionChange={setActiveSection}
+        onLogout={handleSignOut}
+      />
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Total Reports</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{totalReports}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Pending Reports</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-destructive">{pendingReports}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Cleaned Reports</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-primary">{cleanedReports}</div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Leaderboard */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Top Contributors</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {leaderboard.map((user, index) => (
-                <div key={user.id} className="flex items-center justify-between p-4 bg-secondary/20 rounded-lg">
-                  <div className="flex items-center gap-4">
-                    <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">
-                      {index + 1}
-                    </div>
-                    <div>
-                      <p className="font-semibold">{user.name}</p>
-                      <p className="text-sm text-muted-foreground">{user.email}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="text-right">
-                      <p className="text-lg font-bold">{user.total_reports}</p>
-                      <p className="text-sm text-muted-foreground">Total Reports</p>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      {user.citizen_of_week_count > 0 && (
-                        <Badge variant="secondary">
-                          🏆 Citizen of Week x{user.citizen_of_week_count}
-                        </Badge>
-                      )}
-                      {user.citizen_of_month_count > 0 && (
-                        <Badge variant="secondary">
-                          🥇 Citizen of Month x{user.citizen_of_month_count}
-                        </Badge>
-                      )}
-                      {user.citizen_of_year_count > 0 && (
-                        <Badge variant="secondary">
-                          👑 Citizen of Year x{user.citizen_of_year_count}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <header className="bg-card border-b border-border p-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-2xl font-bold">
+                {activeSection.charAt(0).toUpperCase() + activeSection.slice(1)}
+              </h1>
+              <p className="text-muted-foreground">
+                Welcome back, {user?.email}
+              </p>
             </div>
-          </CardContent>
-        </Card>
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-muted-foreground">Admin</span>
+              <Button onClick={handleSignOut} variant="outline" size="sm">
+                Sign Out
+              </Button>
+            </div>
+          </div>
+        </header>
+
+        {/* Content */}
+        <main className="flex-1 p-6 overflow-auto">
+          {renderContent()}
+        </main>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { ArrowLeft, MapPin, Clock, Camera, Trash2 } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, Camera, Trash2, Tag, User, AlertTriangle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { WasteReport } from '../pages/Index';
 
 interface ReportCardProps {
@@ -92,8 +93,17 @@ const ReportCard = ({ report, onBack, onDelete }: ReportCardProps) => {
                 </div>
               </div>
               
-              <div className={`px-4 py-2 rounded-full border font-medium ${getStatusColor(report.status)}`}>
-                {getStatusLabel(report.status)}
+              <div className="flex items-center gap-2">
+                <Badge 
+                  variant={report.status === 'cleaned' || report.status === 'completed' ? 'default' : 
+                          report.status === 'cleaning' || report.status === 'in-progress' ? 'secondary' : 'destructive'}
+                  className="text-sm px-3 py-1"
+                >
+                  {getStatusLabel(report.status)}
+                </Badge>
+                <Badge variant="outline" className="text-xs">
+                  ID: {report.id.slice(0, 8)}
+                </Badge>
               </div>
             </div>
           </div>
@@ -159,10 +169,30 @@ const ReportCard = ({ report, onBack, onDelete }: ReportCardProps) => {
                 </div>
 
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Category</h4>
-                  <span className="inline-block px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm capitalize">
-                    {report.category}
-                  </span>
+                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                    <Tag className="w-4 h-4" />
+                    Category & Tags
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="secondary" className="text-sm">
+                      <Tag className="w-3 h-3 mr-1" />
+                      {report.category}
+                    </Badge>
+                    <Badge variant="outline" className="text-sm">
+                      <MapPin className="w-3 h-3 mr-1" />
+                      Outdoor Area
+                    </Badge>
+                    <Badge variant="outline" className="text-sm">
+                      <User className="w-3 h-3 mr-1" />
+                      Public Report
+                    </Badge>
+                    {(report.status === 'dirty' || report.status === 'cleaning') && (
+                      <Badge variant="destructive" className="text-sm">
+                        <AlertTriangle className="w-3 h-3 mr-1" />
+                        Needs Attention
+                      </Badge>
+                    )}
+                  </div>
                 </div>
 
                 <div>

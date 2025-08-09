@@ -11,7 +11,6 @@ import AnalyticsScreen from '../components/AnalyticsScreen';
 import AuthorityLogin from '../components/AuthorityLogin';
 import Navigation from '../components/Navigation';
 import Leaderboard from '../components/Leaderboard';
-import GalleryView from '../components/GalleryView';
 import { useWasteReports } from '../hooks/useWasteReports';
 
 export type WasteReport = {
@@ -34,7 +33,7 @@ export type WasteReport = {
 
 const Index = () => {
   const { user, signOut } = useAuth();
-  const [currentScreen, setCurrentScreen] = useState<'home' | 'upload' | 'map' | 'report' | 'analytics' | 'authority' | 'leaderboard' | 'gallery'>('home');
+  const [currentScreen, setCurrentScreen] = useState<'home' | 'upload' | 'map' | 'report' | 'analytics' | 'authority' | 'leaderboard'>('home');
   const [selectedReport, setSelectedReport] = useState<WasteReport | null>(null);
   
   const { 
@@ -85,7 +84,7 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-8">
-              <h1 className="text-xl font-bold text-primary">EcoTrack</h1>
+              <h1 className="text-xl font-bold text-primary">Green Hash</h1>
               <Navigation currentScreen={currentScreen} setCurrentScreen={setCurrentScreen} />
             </div>
             <div className="flex items-center gap-4">
@@ -157,11 +156,6 @@ const Index = () => {
           </div>
         )}
 
-        {currentScreen === 'gallery' && (
-          <div className="container mx-auto px-4 py-8">
-            <GalleryView reports={reports} />
-          </div>
-        )}
       </div>
     </div>
   );
