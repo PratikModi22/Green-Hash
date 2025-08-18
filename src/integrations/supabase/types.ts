@@ -7,13 +7,43 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
   }
   public: {
     Tables: {
+      achievement_types: {
+        Row: {
+          badge_icon: string | null
+          created_at: string | null
+          criteria: Json | null
+          description: string | null
+          id: string
+          name: string
+          points: number | null
+        }
+        Insert: {
+          badge_icon?: string | null
+          created_at?: string | null
+          criteria?: Json | null
+          description?: string | null
+          id?: string
+          name: string
+          points?: number | null
+        }
+        Update: {
+          badge_icon?: string | null
+          created_at?: string | null
+          criteria?: Json | null
+          description?: string | null
+          id?: string
+          name?: string
+          points?: number | null
+        }
+        Relationships: []
+      }
       admins: {
         Row: {
           auth_id: string | null
@@ -22,6 +52,7 @@ export type Database = {
           id: string
           name: string
           role: string
+          role_id: string | null
           updated_at: string
         }
         Insert: {
@@ -31,6 +62,7 @@ export type Database = {
           id?: string
           name: string
           role?: string
+          role_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -40,9 +72,307 @@ export type Database = {
           id?: string
           name?: string
           role?: string
+          role_id?: string | null
           updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "admins_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      categories: {
+        Row: {
+          color_code: string | null
+          created_at: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          color_code?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          color_code?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+        }
         Relationships: []
+      }
+      images: {
+        Row: {
+          created_at: string | null
+          file_size: number | null
+          id: string
+          image_type: string
+          mime_type: string | null
+          report_id: string | null
+          url: string
+        }
+        Insert: {
+          created_at?: string | null
+          file_size?: number | null
+          id?: string
+          image_type: string
+          mime_type?: string | null
+          report_id?: string | null
+          url: string
+        }
+        Update: {
+          created_at?: string | null
+          file_size?: number | null
+          id?: string
+          image_type?: string
+          mime_type?: string | null
+          report_id?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_images_report_id"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "waste_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      locations: {
+        Row: {
+          city: string
+          country: string
+          created_at: string | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          postal_code: string | null
+          state: string
+        }
+        Insert: {
+          city: string
+          country?: string
+          created_at?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          postal_code?: string | null
+          state: string
+        }
+        Update: {
+          city?: string
+          country?: string
+          created_at?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          postal_code?: string | null
+          state?: string
+        }
+        Relationships: []
+      }
+      report_activities: {
+        Row: {
+          activity_type: string
+          created_at: string | null
+          description: string | null
+          id: string
+          new_values: Json | null
+          old_values: Json | null
+          report_id: string
+          user_id: string | null
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          report_id: string
+          user_id?: string | null
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          report_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_report_activities_report_id"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "waste_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_report_activities_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      report_statuses: {
+        Row: {
+          color_code: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          sort_order: number | null
+        }
+        Insert: {
+          color_code?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          sort_order?: number | null
+        }
+        Update: {
+          color_code?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
+      roles: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          permissions: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          permissions?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          permissions?: Json | null
+        }
+        Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          achievement_type_id: string
+          count: number | null
+          earned_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          achievement_type_id: string
+          count?: number | null
+          earned_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          achievement_type_id?: string
+          count?: number | null
+          earned_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_user_achievements_achievement_type_id"
+            columns: ["achievement_type_id"]
+            isOneToOne: false
+            referencedRelation: "achievement_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_user_achievements_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_statistics: {
+        Row: {
+          id: string
+          last_month_reset: string | null
+          last_week_reset: string | null
+          last_year_reset: string | null
+          monthly_reports: number | null
+          total_points: number | null
+          total_reports: number | null
+          updated_at: string | null
+          user_id: string
+          weekly_reports: number | null
+          yearly_reports: number | null
+        }
+        Insert: {
+          id?: string
+          last_month_reset?: string | null
+          last_week_reset?: string | null
+          last_year_reset?: string | null
+          monthly_reports?: number | null
+          total_points?: number | null
+          total_reports?: number | null
+          updated_at?: string | null
+          user_id: string
+          weekly_reports?: number | null
+          yearly_reports?: number | null
+        }
+        Update: {
+          id?: string
+          last_month_reset?: string | null
+          last_week_reset?: string | null
+          last_year_reset?: string | null
+          monthly_reports?: number | null
+          total_points?: number | null
+          total_reports?: number | null
+          updated_at?: string | null
+          user_id?: string
+          weekly_reports?: number | null
+          yearly_reports?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_user_statistics_user_id"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       users: {
         Row: {
@@ -57,6 +387,7 @@ export type Database = {
           last_week_reset: string | null
           last_year_reset: string | null
           location: string | null
+          location_id: string | null
           monthly_reports: number | null
           name: string
           total_reports: number | null
@@ -76,6 +407,7 @@ export type Database = {
           last_week_reset?: string | null
           last_year_reset?: string | null
           location?: string | null
+          location_id?: string | null
           monthly_reports?: number | null
           name: string
           total_reports?: number | null
@@ -95,6 +427,7 @@ export type Database = {
           last_week_reset?: string | null
           last_year_reset?: string | null
           location?: string | null
+          location_id?: string | null
           monthly_reports?: number | null
           name?: string
           total_reports?: number | null
@@ -102,7 +435,15 @@ export type Database = {
           weekly_reports?: number | null
           yearly_reports?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "users_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       waste_reports: {
         Row: {
@@ -111,13 +452,16 @@ export type Database = {
           authority_comments: string | null
           before_image_url: string | null
           category: string
+          category_id: string | null
           created_at: string | null
           id: string
           image_url: string
           latitude: number
+          location_id: string | null
           longitude: number
           remarks: string | null
           status: string
+          status_id: string | null
           updated_at: string | null
           user_id: string | null
         }
@@ -127,13 +471,16 @@ export type Database = {
           authority_comments?: string | null
           before_image_url?: string | null
           category: string
+          category_id?: string | null
           created_at?: string | null
           id?: string
           image_url: string
           latitude: number
+          location_id?: string | null
           longitude: number
           remarks?: string | null
           status: string
+          status_id?: string | null
           updated_at?: string | null
           user_id?: string | null
         }
@@ -143,17 +490,41 @@ export type Database = {
           authority_comments?: string | null
           before_image_url?: string | null
           category?: string
+          category_id?: string | null
           created_at?: string | null
           id?: string
           image_url?: string
           latitude?: number
+          location_id?: string | null
           longitude?: number
           remarks?: string | null
           status?: string
+          status_id?: string | null
           updated_at?: string | null
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "waste_reports_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waste_reports_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waste_reports_status_id_fkey"
+            columns: ["status_id"]
+            isOneToOne: false
+            referencedRelation: "report_statuses"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "waste_reports_user_id_fkey"
             columns: ["user_id"]
