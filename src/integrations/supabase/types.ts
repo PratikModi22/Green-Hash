@@ -570,6 +570,44 @@ export type Database = {
           updated_at: string | null
           user_id: string | null
         }
+        Insert: {
+          address?: string | null
+          after_image_url?: string | null
+          authority_comments?: string | null
+          before_image_url?: string | null
+          category?: string | null
+          category_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          image_url?: string | null
+          latitude?: number | null
+          location_id?: string | null
+          longitude?: number | null
+          remarks?: string | null
+          status?: string | null
+          status_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          after_image_url?: string | null
+          authority_comments?: string | null
+          before_image_url?: string | null
+          category?: string | null
+          category_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          image_url?: string | null
+          latitude?: number | null
+          location_id?: string | null
+          longitude?: number | null
+          remarks?: string | null
+          status?: string | null
+          status_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
         Relationships: [
           {
             foreignKeyName: "waste_reports_category_id_fkey"
