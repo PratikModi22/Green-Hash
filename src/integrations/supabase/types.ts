@@ -145,6 +145,13 @@ export type Database = {
             foreignKeyName: "fk_images_report_id"
             columns: ["report_id"]
             isOneToOne: false
+            referencedRelation: "user_waste_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_images_report_id"
+            columns: ["report_id"]
+            isOneToOne: false
             referencedRelation: "waste_reports"
             referencedColumns: ["id"]
           },
@@ -215,6 +222,13 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_report_activities_report_id"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "user_waste_reports"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "fk_report_activities_report_id"
             columns: ["report_id"]
@@ -536,9 +550,76 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      user_waste_reports: {
+        Row: {
+          address: string | null
+          after_image_url: string | null
+          authority_comments: string | null
+          before_image_url: string | null
+          category: string | null
+          category_id: string | null
+          created_at: string | null
+          id: string | null
+          image_url: string | null
+          latitude: number | null
+          location_id: string | null
+          longitude: number | null
+          remarks: string | null
+          status: string | null
+          status_id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "waste_reports_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waste_reports_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waste_reports_status_id_fkey"
+            columns: ["status_id"]
+            isOneToOne: false
+            referencedRelation: "report_statuses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waste_reports_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      get_public_waste_reports: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          address: string
+          after_image_url: string
+          approximate_location: string
+          authority_comments: string
+          before_image_url: string
+          category: string
+          created_at: string
+          id: string
+          image_url: string
+          remarks: string
+          status: string
+          updated_at: string
+        }[]
+      }
       reset_monthly_counts: {
         Args: Record<PropertyKey, never>
         Returns: undefined
