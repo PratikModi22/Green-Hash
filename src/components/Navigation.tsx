@@ -1,10 +1,10 @@
 
 import React from 'react';
-import { Camera, Map, BarChart3, Shield, Home, Trophy } from 'lucide-react';
+import { Camera, Map, BarChart3, Home, Trophy, ImageIcon } from 'lucide-react';
 
 interface NavigationProps {
   currentScreen: string;
-  setCurrentScreen: (screen: 'home' | 'upload' | 'map' | 'analytics' | 'authority' | 'leaderboard') => void;
+  setCurrentScreen: (screen: 'home' | 'upload' | 'map' | 'analytics' | 'leaderboard' | 'feed') => void;
 }
 
 const Navigation = ({ currentScreen, setCurrentScreen }: NavigationProps) => {
@@ -12,10 +12,9 @@ const Navigation = ({ currentScreen, setCurrentScreen }: NavigationProps) => {
     { id: 'home', label: 'Home', icon: Home },
     { id: 'upload', label: 'Report', icon: Camera },
     { id: 'map', label: 'Map', icon: Map },
-    
+    { id: 'feed', label: 'Feed', icon: ImageIcon },
     { id: 'leaderboard', label: 'Leaderboard', icon: Trophy },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-    { id: 'authority', label: 'Authority', icon: Shield },
   ];
 
   return (

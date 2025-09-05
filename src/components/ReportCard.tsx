@@ -8,9 +8,10 @@ interface ReportCardProps {
   report: WasteReport;
   onBack: () => void;
   onDelete: (reportId: string) => void;
+  showDeleteButton?: boolean;
 }
 
-const ReportCard = ({ report, onBack, onDelete }: ReportCardProps) => {
+const ReportCard = ({ report, onBack, onDelete, showDeleteButton = true }: ReportCardProps) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'dirty': return 'bg-red-100 text-red-700 border-red-200';
@@ -66,13 +67,15 @@ const ReportCard = ({ report, onBack, onDelete }: ReportCardProps) => {
             <span>Back to Map</span>
           </button>
           
-          <button
-            onClick={handleDelete}
-            className="flex items-center space-x-2 text-red-600 hover:text-red-700 transition-colors"
-          >
-            <Trash2 className="w-4 h-4" />
-            <span>Delete Report</span>
-          </button>
+          {showDeleteButton && (
+            <button
+              onClick={handleDelete}
+              className="flex items-center space-x-2 text-red-600 hover:text-red-700 transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span>Delete Report</span>
+            </button>
+          )}
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">

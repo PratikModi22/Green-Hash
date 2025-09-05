@@ -11,6 +11,7 @@ import ViewReports from '@/components/admin/ViewReports';
 import LeaderboardManagement from '@/components/admin/LeaderboardManagement';
 import AdminAnalytics from '@/components/admin/AdminAnalytics';
 import AdminSettings from '@/components/admin/AdminSettings';
+import AdminReportManager from '@/components/admin/AdminReportManager';
 
 interface LeaderboardUser {
   id: string;
@@ -27,7 +28,7 @@ interface LeaderboardUser {
 
 const AdminDashboard = () => {
   const { user, isAdmin, signOut } = useAuth();
-  const { reports } = useWasteReports();
+  const { reports, updateReport, uploadImage } = useWasteReports();
   const navigate = useNavigate();
   const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -71,6 +72,8 @@ const AdminDashboard = () => {
         return <ManageUsers leaderboard={leaderboard} />;
       case 'reports':
         return <ViewReports reports={reports} />;
+      case 'manage-reports':
+        return <AdminReportManager reports={reports} onUpdateReport={updateReport} uploadImage={uploadImage} />;
       case 'leaderboard':
         return <LeaderboardManagement leaderboard={leaderboard} />;
       case 'analytics':

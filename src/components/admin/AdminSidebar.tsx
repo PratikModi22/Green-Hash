@@ -22,6 +22,7 @@ const AdminSidebar = ({ activeSection, onSectionChange, onLogout }: AdminSidebar
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'users', label: 'Manage Users', icon: Users },
     { id: 'reports', label: 'View Reports', icon: FileText },
+    { id: 'manage-reports', label: 'Manage Reports', icon: FileText },
     { id: 'leaderboard', label: 'Leaderboard Management', icon: Trophy },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'settings', label: 'Settings', icon: Settings },

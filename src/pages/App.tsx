@@ -7,9 +7,9 @@ import UploadScreen from '../components/UploadScreen';
 import MapView from '../components/MapView';
 import ReportCard from '../components/ReportCard';
 import AnalyticsScreen from '../components/AnalyticsScreen';
-import AuthorityLogin from '../components/AuthorityLogin';
 import Navigation from '../components/Navigation';
 import Leaderboard from '../components/Leaderboard';
+import FeedScreen from '../components/FeedScreen';
 import { useWasteReports } from '../hooks/useWasteReports';
 
 export type WasteReport = {
@@ -30,9 +30,9 @@ export type WasteReport = {
   authorityComments?: string;
 };
 
-const Index = () => {
-  const { user, signOut } = useAuth();
-  const [currentScreen, setCurrentScreen] = useState<'home' | 'upload' | 'map' | 'report' | 'analytics' | 'authority' | 'leaderboard'>('home');
+const App = () => {
+  const { user, signOut, isAdmin } = useAuth();
+  const [currentScreen, setCurrentScreen] = useState<'home' | 'upload' | 'map' | 'report' | 'analytics' | 'leaderboard' | 'feed'>('home');
   const [selectedReport, setSelectedReport] = useState<WasteReport | null>(null);
   
   const { 
@@ -40,21 +40,12 @@ const Index = () => {
     loading, 
     addReport, 
     updateReport, 
-    deleteReport, 
     uploadImage 
   } = useWasteReports();
 
   const handleReportSelect = (report: WasteReport) => {
     setSelectedReport(report);
     setCurrentScreen('report');
-  };
-
-  const handleDeleteReport = (reportId: string) => {
-    deleteReport(reportId);
-    if (selectedReport && selectedReport.id === reportId) {
-      setSelectedReport(null);
-      setCurrentScreen('map');
-    }
   };
 
   const getStats = () => {
@@ -64,43 +55,6 @@ const Index = () => {
     const inProgress = reports.filter(r => r.status === 'cleaning' || r.status === 'in-progress').length;
     
     return { total, cleaned, pending, inProgress };
-  };
-
-  // Updated Navigation component to match legacy interface
-  const LegacyNavigation = ({ currentScreen, setCurrentScreen }: {
-    currentScreen: string;
-    setCurrentScreen: (screen: 'home' | 'upload' | 'map' | 'analytics' | 'authority' | 'leaderboard') => void;
-  }) => {
-    const navItems = [
-      { id: 'home', label: 'Home', icon: 'Home' },
-      { id: 'upload', label: 'Report', icon: 'Camera' },
-      { id: 'map', label: 'Map', icon: 'Map' },
-      { id: 'leaderboard', label: 'Leaderboard', icon: 'Trophy' },
-      { id: 'analytics', label: 'Analytics', icon: 'BarChart3' },
-      { id: 'authority', label: 'Authority', icon: 'Shield' },
-    ];
-
-    return (
-      <div className="flex space-x-1">
-        {navItems.map((item) => {
-          const isActive = currentScreen === item.id;
-          
-          return (
-            <button
-              key={item.id}
-              onClick={() => setCurrentScreen(item.id as any)}
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                isActive
-                  ? 'bg-emerald-100 text-emerald-700'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-              }`}
-            >
-              <span className="hidden sm:inline">{item.label}</span>
-            </button>
-          );
-        })}
-      </div>
-    );
   };
 
   if (loading) {
@@ -120,24 +74,23 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-8">
-              <h1 className="text-xl font-bold text-primary">Green Hash (Legacy)</h1>
-              <LegacyNavigation currentScreen={currentScreen} setCurrentScreen={setCurrentScreen} />
+              <h1 className="text-xl font-bold text-primary">Green Hash</h1>
+              <Navigation currentScreen={currentScreen} setCurrentScreen={setCurrentScreen} />
             </div>
             <div className="flex items-center gap-4">
-              {user ? (
-                <div className="flex items-center gap-4">
-                  <span className="text-sm text-muted-foreground">Hello, {user.email}</span>
-                  <Button onClick={signOut} variant="outline" size="sm">
-                    Sign Out
-                  </Button>
-                </div>
-              ) : (
-                <Link to="/">
+              {isAdmin && (
+                <Link to="/admin">
                   <Button variant="outline" size="sm">
-                    Sign In / Sign Up
+                    Admin Panel
                   </Button>
                 </Link>
               )}
+              <div className="flex items-center gap-4">
+                <span className="text-sm text-muted-foreground">Hello, {user?.email}</span>
+                <Button onClick={signOut} variant="outline" size="sm">
+                  Sign Out
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -171,19 +124,13 @@ const Index = () => {
           <ReportCard 
             report={selectedReport}
             onBack={() => setCurrentScreen('map')}
-            onDelete={handleDeleteReport}
+            onDelete={() => {}} // Users can no longer delete reports
+            showDeleteButton={false}
           />
         )}
         
         {currentScreen === 'analytics' && (
           <AnalyticsScreen reports={reports} />
-        )}
-        
-        {currentScreen === 'authority' && (
-          <AuthorityLogin 
-            reports={reports}
-            onUpdateReport={updateReport}
-          />
         )}
 
         {currentScreen === 'leaderboard' && (
@@ -192,9 +139,12 @@ const Index = () => {
           </div>
         )}
 
+        {currentScreen === 'feed' && (
+          <FeedScreen reports={reports} />
+        )}
       </div>
     </div>
   );
 };
 
-export default Index;
+export default App;

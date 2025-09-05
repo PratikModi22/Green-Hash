@@ -8,6 +8,9 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
+import MainApp from "./pages/App";
+import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
 
 const queryClient = new QueryClient();
 
@@ -17,9 +20,18 @@ const App = () => (
       <TooltipProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/gh-admin" element={<AdminDashboard />} />
+            <Route path="/" element={<Auth />} />
+            <Route path="/app" element={
+              <ProtectedRoute>
+                <MainApp />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin" element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            } />
+            <Route path="/legacy" element={<Index />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
