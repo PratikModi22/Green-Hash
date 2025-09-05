@@ -641,23 +641,6 @@ export type Database = {
       }
     }
     Functions: {
-      get_public_waste_reports: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          address: string
-          after_image_url: string
-          approximate_location: string
-          authority_comments: string
-          before_image_url: string
-          category: string
-          created_at: string
-          id: string
-          image_url: string
-          remarks: string
-          status: string
-          updated_at: string
-        }[]
-      }
       reset_monthly_counts: {
         Args: Record<PropertyKey, never>
         Returns: undefined
