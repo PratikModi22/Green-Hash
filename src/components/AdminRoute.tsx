@@ -21,11 +21,11 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   }
 
   if (!user) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/admin" replace />;
   }
 
   if (!isAdmin) {
-    return <Navigate to="/app" replace />;
+    return <Navigate to="/admin" replace />;
   }
 
   return <>{children}</>;

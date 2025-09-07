@@ -8,11 +8,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect } from 'react';
 import { Shield } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resetMode, setResetMode] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
   const { signIn, user, isAdmin, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -53,6 +56,47 @@ const AdminLogin = () => {
     }
   };
 
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) {
+      toast({
+        variant: "destructive",
+        title: "Email required",
+        description: "Please enter your email address"
+      });
+      return;
+    }
+
+    setResetLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/admin`
+      });
+      
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Reset failed",
+          description: error.message
+        });
+      } else {
+        toast({
+          title: "Reset link sent",
+          description: "Check your email for password reset instructions"
+        });
+        setResetMode(false);
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "An unexpected error occurred"
+      });
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-secondary/20">
@@ -76,7 +120,33 @@ const AdminLogin = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {resetMode ? (
+            <form onSubmit={handlePasswordReset} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="reset-email">Email</Label>
+                <Input
+                  id="reset-email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your admin email"
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={resetLoading}>
+                {resetLoading ? "Sending reset link..." : "Send Reset Link"}
+              </Button>
+              <Button 
+                type="button" 
+                variant="ghost" 
+                className="w-full" 
+                onClick={() => setResetMode(false)}
+              >
+                Back to Sign In
+              </Button>
+            </form>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -99,10 +169,19 @@ const AdminLogin = () => {
                 required
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Signing in..." : "Sign In to Admin Panel"}
-            </Button>
-          </form>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Signing in..." : "Sign In to Admin Panel"}
+              </Button>
+              <Button 
+                type="button" 
+                variant="ghost" 
+                className="w-full text-sm" 
+                onClick={() => setResetMode(true)}
+              >
+                Forgot your password?
+              </Button>
+            </form>
+          )}
           
           <div className="mt-6 text-center">
             <p className="text-sm text-muted-foreground">
