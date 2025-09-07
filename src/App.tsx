@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import MainApp from "./pages/App";
@@ -26,7 +27,8 @@ const App = () => (
                 <MainApp />
               </ProtectedRoute>
             } />
-            <Route path="/admin" element={
+            <Route path="/admin" element={<AdminLogin />} />
+            <Route path="/admin/dashboard" element={
               <AdminRoute>
                 <AdminDashboard />
               </AdminRoute>
