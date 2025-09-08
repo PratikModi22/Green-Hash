@@ -149,11 +149,35 @@ const AdminReportManager: React.FC<AdminReportManagerProps> = ({
             {selectedReport ? (
               <>
                 <div className="space-y-2">
-                  <Label>Current Report</Label>
-                  <div className="p-3 bg-gray-50 rounded-lg">
-                    <p className="font-medium">{selectedReport.location.address}</p>
-                    <p className="text-sm text-gray-600">Category: {selectedReport.category}</p>
-                    <p className="text-sm text-gray-600">ID: {selectedReport.id.slice(0, 8)}</p>
+                  <Label>Current Report Images</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 bg-gray-50 rounded-lg">
+                    {/* Before Image */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                        <p className="text-sm font-medium">Before (Citizen Report)</p>
+                      </div>
+                      <img 
+                        src={selectedReport.image || selectedReport.beforeImage} 
+                        alt="Before cleanup" 
+                        className="w-full h-32 object-cover rounded-lg border"
+                      />
+                    </div>
+                    
+                    {/* After Image Preview */}
+                    {(selectedReport.afterImage || afterImage) && (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
+                          <p className="text-sm font-medium">After (Admin Upload)</p>
+                        </div>
+                        <img 
+                          src={afterImage ? URL.createObjectURL(afterImage) : selectedReport.afterImage} 
+                          alt="After cleanup" 
+                          className="w-full h-32 object-cover rounded-lg border"
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
 

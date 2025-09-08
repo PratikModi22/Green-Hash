@@ -63,33 +63,41 @@ const FeedScreen: React.FC<FeedScreenProps> = ({ reports }) => {
 
                 {/* Before and After Images */}
                 <div className="grid grid-cols-1 md:grid-cols-2">
-                  {/* Before Image */}
-                  <div className="relative">
-                    <img 
-                      src={report.beforeImage || report.image} 
-                      alt="Before cleanup" 
-                      className="w-full h-64 md:h-80 object-cover"
-                    />
-                    <div className="absolute top-4 left-4">
-                      <Badge variant="destructive" className="bg-red-500">
-                        Before
-                      </Badge>
-                    </div>
-                  </div>
+              {/* Before Image */}
+              <div className="relative group">
+                <img 
+                  src={report.image || report.beforeImage} 
+                  alt="Before cleanup" 
+                  className="w-full h-64 md:h-80 object-cover transition-transform group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                <div className="absolute top-4 left-4">
+                  <Badge variant="destructive" className="bg-red-500 shadow-lg">
+                    BEFORE
+                  </Badge>
+                </div>
+                <div className="absolute bottom-4 left-4">
+                  <p className="text-white text-sm font-medium">Original Report</p>
+                </div>
+              </div>
 
-                  {/* After Image */}
-                  <div className="relative">
-                    <img 
-                      src={report.afterImage} 
-                      alt="After cleanup" 
-                      className="w-full h-64 md:h-80 object-cover"
-                    />
-                    <div className="absolute top-4 left-4">
-                      <Badge variant="default" className="bg-emerald-500">
-                        After
-                      </Badge>
-                    </div>
-                  </div>
+              {/* After Image */}
+              <div className="relative group">
+                <img 
+                  src={report.afterImage} 
+                  alt="After cleanup" 
+                  className="w-full h-64 md:h-80 object-cover transition-transform group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                <div className="absolute top-4 left-4">
+                  <Badge variant="default" className="bg-emerald-500 shadow-lg">
+                    AFTER
+                  </Badge>
+                </div>
+                <div className="absolute bottom-4 left-4">
+                  <p className="text-white text-sm font-medium">Cleanup Complete</p>
+                </div>
+              </div>
                 </div>
 
                 {/* Content */}
