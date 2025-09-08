@@ -653,6 +653,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      send_admin_password_reset: {
+        Args: { admin_email: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
