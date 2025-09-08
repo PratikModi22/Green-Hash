@@ -29,39 +29,77 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
+    
     const checkAdminStatus = async (user: User | null) => {
+      if (!mounted) return;
+      
       if (user) {
-        const { data: adminData } = await supabase
-          .from('admins')
-          .select('*')
-          .eq('auth_id', user.id)
-          .single();
-        
-        setIsAdmin(!!adminData);
+        try {
+          const { data: adminData, error } = await supabase
+            .from('admins')
+            .select('*')
+            .eq('auth_id', user.id)
+            .maybeSingle();
+          
+          if (mounted && !error) {
+            setIsAdmin(!!adminData);
+          }
+        } catch (error) {
+          console.error('Error checking admin status:', error);
+          if (mounted) {
+            setIsAdmin(false);
+          }
+        }
       } else {
-        setIsAdmin(false);
+        if (mounted) {
+          setIsAdmin(false);
+        }
       }
     };
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!mounted) return;
+        
         setSession(session);
         setUser(session?.user ?? null);
-        await checkAdminStatus(session?.user ?? null);
+        
+        // Use setTimeout to avoid blocking auth state changes
+        setTimeout(() => {
+          checkAdminStatus(session?.user ?? null);
+        }, 0);
+        
         setLoading(false);
       }
     );
 
     // Check for existing session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session }, error }) => {
+      if (!mounted) return;
+      
+      if (error) {
+        console.error('Error getting session:', error);
+        setLoading(false);
+        return;
+      }
+      
       setSession(session);
       setUser(session?.user ?? null);
-      await checkAdminStatus(session?.user ?? null);
+      
+      // Use setTimeout to avoid blocking
+      setTimeout(() => {
+        checkAdminStatus(session?.user ?? null);
+      }, 0);
+      
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signUp = async (email: string, password: string, name: string) => {
