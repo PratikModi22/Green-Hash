@@ -120,12 +120,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
-    
-    return { error };
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      return { error };
+    } catch (error) {
+      console.error('Sign in error:', error);
+      return { error: { message: 'Authentication failed. Please try again.' } };
+    }
   };
 
   const signOut = async () => {

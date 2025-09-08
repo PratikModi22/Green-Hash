@@ -8,8 +8,18 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { user, loading } = useAuth();
+  const [timeoutReached, setTimeoutReached] = React.useState(false);
 
-  if (loading) {
+  // Add timeout to prevent infinite loading
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setTimeoutReached(true);
+    }, 10000); // 10 second timeout
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading && !timeoutReached) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -18,6 +28,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
         </div>
       </div>
     );
+  }
+
+  if (timeoutReached && loading) {
+    return <Navigate to="/" replace />;
   }
 
   if (!user) {
