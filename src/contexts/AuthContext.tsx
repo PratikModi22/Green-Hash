@@ -29,35 +29,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const checkAdminStatus = async (user: User | null) => {
+      if (user) {
+        const { data: adminData } = await supabase
+          .from('admins')
+          .select('*')
+          .eq('auth_id', user.id)
+          .single();
+        
+        setIsAdmin(!!adminData);
+      } else {
+        setIsAdmin(false);
+      }
+    };
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          // Check if user is admin
-          setTimeout(async () => {
-            const { data: adminData } = await supabase
-              .from('admins')
-              .select('*')
-              .eq('auth_id', session.user.id)
-              .single();
-            
-            setIsAdmin(!!adminData);
-          }, 0);
-        } else {
-          setIsAdmin(false);
-        }
-        
+        await checkAdminStatus(session?.user ?? null);
         setLoading(false);
       }
     );
 
     // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      await checkAdminStatus(session?.user ?? null);
       setLoading(false);
     });
 

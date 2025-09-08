@@ -220,6 +220,7 @@ const UploadScreen = ({ onAddReport, onNavigate, uploadImage }: UploadScreenProp
                       <input
                         type="file"
                         accept="image/*"
+                        capture="environment"
                         onChange={handleImageSelect}
                         className="hidden"
                         id="image-upload"
@@ -228,11 +229,11 @@ const UploadScreen = ({ onAddReport, onNavigate, uploadImage }: UploadScreenProp
                         htmlFor="image-upload"
                         className="cursor-pointer inline-flex items-center space-x-2 bg-emerald-500 text-white px-4 py-2 rounded-lg hover:bg-emerald-600 transition-colors"
                       >
-                        <Upload className="w-4 h-4" />
-                        <span>Choose Image</span>
+                        <Camera className="w-4 h-4" />
+                        <span>Take Photo</span>
                       </label>
                       <p className="text-sm text-gray-500 mt-2">
-                        Upload a photo of the waste area
+                        Take a photo of the waste area
                       </p>
                     </div>
                   )}
