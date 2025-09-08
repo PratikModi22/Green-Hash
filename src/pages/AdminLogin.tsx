@@ -69,6 +69,23 @@ const AdminLogin = () => {
 
     setResetLoading(true);
     try {
+      // Check if user exists first
+      const { data: userExists } = await supabase
+        .from('users')
+        .select('email')
+        .eq('email', email)
+        .single();
+
+      if (!userExists) {
+        toast({
+          variant: "destructive",
+          title: "User not found",
+          description: "No account found with this email address"
+        });
+        setResetLoading(false);
+        return;
+      }
+
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/admin`
       });
@@ -82,7 +99,7 @@ const AdminLogin = () => {
       } else {
         toast({
           title: "Reset link sent",
-          description: "Check your email for password reset instructions"
+          description: "Check your email for password reset instructions. The link will redirect you back to the admin panel."
         });
         setResetMode(false);
       }
