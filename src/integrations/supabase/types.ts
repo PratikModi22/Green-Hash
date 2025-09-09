@@ -641,6 +641,10 @@ export type Database = {
       }
     }
     Functions: {
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       reset_monthly_counts: {
         Args: Record<PropertyKey, never>
         Returns: undefined
