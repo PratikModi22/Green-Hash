@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Camera, MapPin, Upload, AlertCircle } from 'lucide-react';
 import { WasteReport } from '../pages/Index';
+import { Label } from '@/components/ui/label';
 
 interface UploadScreenProps {
   onAddReport: (report: Omit<WasteReport, 'id' | 'reportedAt' | 'updatedAt'>) => Promise<WasteReport | null>;

@@ -14,9 +14,11 @@ const AdminLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [signUpMode, setSignUpMode] = useState(false);
   const [resetMode, setResetMode] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
-  const { signIn, user, isAdmin, loading: authLoading } = useAuth();
+  const [name, setName] = useState('');
+  const { signIn, signUp, user, isAdmin, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -32,18 +34,54 @@ const AdminLogin = () => {
     }
   }, [user, isAdmin, navigate, authLoading, toast]);
 
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { error } = await signUp(email, password, name);
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Admin sign up failed",
+          description: error.message
+        });
+      } else {
+        toast({
+          title: "Sign up successful",
+          description: "Please check your email to confirm your account. After confirmation, contact another admin to grant admin privileges."
+        });
+        setSignUpMode(false);
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "An unexpected error occurred"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const { error } = await signIn(email, password);
+      const { error } = signUpMode ? await signUp(email, password, name) : await signIn(email, password);
       if (error) {
         toast({
           variant: "destructive",
-          title: "Admin sign in failed",
+          title: signUpMode ? "Admin sign up failed" : "Admin sign in failed",
           description: error.message
         });
+      } else if (signUpMode) {
+        toast({
+          title: "Sign up successful",
+          description: "Please check your email to confirm your account."
+        });
+        setSignUpMode(false);
       }
     } catch (error) {
       toast({
@@ -133,7 +171,7 @@ const AdminLogin = () => {
           </div>
           <CardTitle className="text-2xl font-bold">Admin Portal</CardTitle>
           <CardDescription>
-            Sign in to access the admin dashboard
+            {signUpMode ? "Create an admin account" : "Sign in to access the admin dashboard"}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -175,6 +213,19 @@ const AdminLogin = () => {
                 required
               />
             </div>
+            {signUpMode && (
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter your full name"
+                  required
+                />
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input
@@ -187,15 +238,28 @@ const AdminLogin = () => {
               />
             </div>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Signing in..." : "Sign In to Admin Panel"}
+                {loading ? 
+                  (signUpMode ? "Creating account..." : "Signing in...") : 
+                  (signUpMode ? "Create Admin Account" : "Sign In to Admin Panel")
+                }
               </Button>
+              {!signUpMode && (
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  className="w-full text-sm" 
+                  onClick={() => setResetMode(true)}
+                >
+                  Forgot your password?
+                </Button>
+              )}
               <Button 
                 type="button" 
-                variant="ghost" 
-                className="w-full text-sm" 
-                onClick={() => setResetMode(true)}
+                variant="outline" 
+                className="w-full" 
+                onClick={() => setSignUpMode(!signUpMode)}
               >
-                Forgot your password?
+                {signUpMode ? "Already have an account? Sign In" : "Need an account? Sign Up"}
               </Button>
             </form>
           )}
