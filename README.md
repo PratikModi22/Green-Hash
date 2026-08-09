@@ -2,6 +2,8 @@
 
 > **Empowering citizens to report local waste sites and assisting municipal authorities in streamlining cleanup efforts through geolocated mapping, real-time collaboration, and gamified civic incentives.**
 
+### 🌐 Live Demo: [nagarsetu.netlify.app](https://nagarsetu.netlify.app/)
+
 ---
 
 ## 🖼️ Screen Previews & User Roles
