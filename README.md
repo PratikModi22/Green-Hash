@@ -3,7 +3,7 @@
 
 > **Empowering citizens to report local waste sites and assisting municipal authorities in streamlining cleanup efforts through geolocated mapping, real-time collaboration, and gamified civic incentives.**
 
-### 🌐 Live Demo: [nagarsetu.netlify.app](https://green-hash.netlify.app/)
+### 🌐 Live Demo: [green-hash.netlify.app](https://green-hash.netlify.app/)
 
 ---
 
