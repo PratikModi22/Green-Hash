@@ -1,22 +1,35 @@
-# 🍃 Green Hash — Real-Time Geo-Tagged Civic Utility Platform
+<img width="1608" height="915" alt="image" src="https://github.com/user-attachments/assets/60f05930-1fb9-4fea-9fdb-87d0bbc10926" /><img width="1608" height="915" alt="image" src="https://github.com/user-attachments/assets/482140e7-ac29-4904-be63-9a4bdc93d6ef" /># 🍃 Green Hash — Real-Time Geo-Tagged Civic Utility Platform
 
 > **Empowering citizens to report local waste sites and assisting municipal authorities in streamlining cleanup efforts through geolocated mapping, real-time collaboration, and gamified civic incentives.**
 
-### 🌐 Live Demo: [nagarsetu.netlify.app](https://nagarsetu.netlify.app/)
+### 🌐 Live Demo: [nagarsetu.netlify.app](https://green-hash.netlify.app/)
 
 ---
 
 ## 🖼️ Screen Previews & User Roles
 
 ### 📱 User (Citizen) Interface
+<img width="1608" height="915" alt="image" src="https://github.com/user-attachments/assets/793214b3-277f-47f3-a634-9a95e6437aa6" />
+
 * **Interactive Geo-Map:** Citizens can locate waste reports around their neighborhood. Pins are color-coded depending on cleaning status (Red = Needs Cleanup, Yellow = In Progress, Green = Cleaned).
-  <img width="100%" alt="Citizen Interactive Map" src="https://github.com/user-attachments/assets/b5089677-1b57-4b3e-9b0b-36bff1ff90b5" />
+<img width="1663" height="865" alt="image" src="https://github.com/user-attachments/assets/a166fe95-170a-4b75-8d6b-39831c442757" />
+
+* **Community Feed:** Before and after images of reports to showcase the efforts of muncipal  authorities.
+<img width="843" height="611" alt="image" src="https://github.com/user-attachments/assets/3f7e3b2a-6269-473d-b8ae-c62a68ae81b2" />
+
 * **Civic Leaderboard & Badges:** Gamified elements showing points earned from submissions and won citizen badges (like *Eco Warrior* and *Citizen of the Week*).
-  <img width="100%" alt="Leaderboard & Achievements" src="https://github.com/user-attachments/assets/7e7f9edc-713e-4bf8-b51e-552c4e75b340" />
+<img width="1604" height="881" alt="image" src="https://github.com/user-attachments/assets/34fa0f6e-8732-4a21-bc73-0a3726aea149" />
 
 ### 🛡️ Admin (Municipal) Dashboard
+
 * **Verification & Resolution:** Admins manage reported spots, change status, and are required to upload an "After Image" proof before resolving the report.
-  <img width="100%" alt="Admin Cleanup Verification View" src="https://github.com/user-attachments/assets/685e869b-268c-4866-bb58-00927997e8a2" />
+  <img width="1748" height="932" alt="image" src="https://github.com/user-attachments/assets/de8caf90-5232-4a7e-bcb3-8c9cbc3f5634" />
+
+* **Route Optimizer:** Built for all the garbage truck drivers to map out and find the most effiecnt way to collect garbage saving fuel and time.
+  <img width="1626" height="1008" alt="image" src="https://github.com/user-attachments/assets/f1f68e8a-b009-46c1-bf25-6915798c1a2a" />
+  
+* **Manage reports:** To mark a waste report cleaned after image is neccesary 
+<img width="1578" height="991" alt="image" src="https://github.com/user-attachments/assets/d3390fe7-18bd-4a42-ac9e-173501da5a81" />
 
 ---
 
