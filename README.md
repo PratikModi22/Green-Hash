@@ -89,16 +89,16 @@ To explore the application's roles and dashboards, you can use the following pre
                                      |                              ^                       |
                                      v                              |                       |
                            +----------------------------------------+                       |
-                           |       PostgreSQL Database (5NF)        |                       |
+                           |       PostgreSQL Database Schema       |                       |
                            |  (Triggers, RLS, Functions, Audit)     |<----------------------+
                            +----------------------------------------+
 ```
 
 ---
 
-## 🗄️ Database Design (5NF & PL/pgSQL)
+## 🗄️ Database Design (Schema & PL/pgSQL)
 
-The PostgreSQL database is normalized to **Fifth Normal Form (5NF)** to minimize storage redundancy, prevent update anomalies, and speed up query lookups via indexes.
+The PostgreSQL database is structured with a highly normalized schema to minimize storage redundancy, prevent update anomalies, and speed up query lookups via indexes.
 
 ### Key Database Schema Elements
 * **`locations`**: Holds coordinates and unique city/state/country combinations.
