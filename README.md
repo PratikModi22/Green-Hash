@@ -1,4 +1,5 @@
-<img width="1608" height="915" alt="image" src="https://github.com/user-attachments/assets/60f05930-1fb9-4fea-9fdb-87d0bbc10926" /><img width="1608" height="915" alt="image" src="https://github.com/user-attachments/assets/482140e7-ac29-4904-be63-9a4bdc93d6ef" /># 🍃 Green Hash — Real-Time Geo-Tagged Civic Utility Platform
+# 🍃 Green Hash — Real-Time Geo-Tagged Civic Utility Platform
+<img width="1608" height="915" alt="image" src="https://github.com/user-attachments/assets/482140e7-ac29-4904-be63-9a4bdc93d6ef" />
 
 > **Empowering citizens to report local waste sites and assisting municipal authorities in streamlining cleanup efforts through geolocated mapping, real-time collaboration, and gamified civic incentives.**
 
