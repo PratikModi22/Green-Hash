@@ -10,7 +10,6 @@
 ## 🖼️ Screen Previews & User Roles
 
 ### 📱 User (Citizen) Interface
-<img width="1608" height="915" alt="image" src="https://github.com/user-attachments/assets/793214b3-277f-47f3-a634-9a95e6437aa6" />
 
 * **Interactive Geo-Map:** Citizens can locate waste reports around their neighborhood. Pins are color-coded depending on cleaning status (Red = Needs Cleanup, Yellow = In Progress, Green = Cleaned).
 <img width="1663" height="865" alt="image" src="https://github.com/user-attachments/assets/a166fe95-170a-4b75-8d6b-39831c442757" />
